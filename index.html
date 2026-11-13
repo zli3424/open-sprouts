@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Open Sprouts App Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Layout: one iPhone-sized column, five tabs, quiet sage cards. The plants' faces carry the colour. */
+  --bg:#EDF2EA; --surface:#FFFFFF; --surface-2:#E0E9DD; --line:#D2DDCF;
+  --ink:#13251B; --ink-2:#56685C;
+  --leaf:#1B7A46; --on-leaf:#FFFFFF; --leaf-soft:#D4EDDB; --leaf-ink:#145C35;
+  --sun:#F2B01E; --sun-soft:#FBEDC2; --sun-ink:#7A4E00;
+  --water:#2B7FCC; --water-soft:#DAEAFA; --water-ink:#1B5C99;
+  --alert:#D2433A; --alert-soft:#FBE1DD; --alert-ink:#9C2A22;
+  --stage:#D7E1D4; --bezel:#0B100D;
+  --display:'Bricolage Grotesque','Avenir Next','Segoe UI',system-ui,sans-serif;
+  --body:'Figtree',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --r:18px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1712; --surface:#16241C; --surface-2:#203227; --line:#2B3F32;
+    --ink:#E7F1E9; --ink-2:#9BAFA1;
+    --leaf:#4CC27F; --on-leaf:#08140D; --leaf-soft:#1B3A29; --leaf-ink:#8FE0B0;
+    --sun:#F5C04A; --sun-soft:#3A3013; --sun-ink:#F6D680;
+    --water:#5AA9EE; --water-soft:#17304A; --water-ink:#9CCBF6;
+    --alert:#F0695E; --alert-soft:#42201C; --alert-ink:#FFA9A1;
+    --stage:#050A07; --bezel:#000;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1712; --surface:#16241C; --surface-2:#203227; --line:#2B3F32;
+  --ink:#E7F1E9; --ink-2:#9BAFA1;
+  --leaf:#4CC27F; --on-leaf:#08140D; --leaf-soft:#1B3A29; --leaf-ink:#8FE0B0;
+  --sun:#F5C04A; --sun-soft:#3A3013; --sun-ink:#F6D680;
+  --water:#5AA9EE; --water-soft:#17304A; --water-ink:#9CCBF6;
+  --alert:#F0695E; --alert-soft:#42201C; --alert-ink:#FFA9A1;
+  --stage:#050A07; --bezel:#000;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--stage);color:var(--ink);font:400 15px/1.4 var(--body);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0;text-align:inherit}
+:focus-visible{outline:2.5px solid var(--water);outline-offset:2px;border-radius:8px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;letter-spacing:-.01em}
+svg{display:block}
+[hidden]{display:none!important}
+
+/* Phone shell */
+.stage{height:100%;display:flex;align-items:center;justify-content:center;padding:12px}
+.phone{width:390px;max-width:100%;height:min(844px,100%);max-height:100%;flex:none;background:var(--bg);border:10px solid var(--bezel);border-radius:52px;overflow:hidden;overflow:clip;position:relative;display:flex;flex-direction:column;box-shadow:0 30px 60px -30px rgba(0,0,0,.45)}
+.statusbar{height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 26px 0 30px;font-weight:600;font-size:15px;position:relative;z-index:3}
+.statusbar .island{position:absolute;left:50%;top:9px;transform:translateX(-50%);width:104px;height:28px;border-radius:16px;background:#000}
+.statusbar .sys{display:flex;gap:6px;align-items:center}
+.phone.cammode .statusbar{background:#000;color:#fff}
+.screen{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;position:relative;padding-bottom:20px;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.screen.is-cam{padding:0;overflow:hidden;overflow:clip}
+.screen.enter>*{animation:push .22s ease-out}
+@keyframes push{from{transform:translateX(14px);opacity:.4}to{transform:none;opacity:1}}
+@media (max-width:480px){
+  .stage{padding:0}
+  .phone{width:100%;height:100%;border:0;border-radius:0;box-shadow:none}
+  .statusbar{display:none}
+}
+
+/* Tab bar */
+.tabbar{flex:none;display:grid;grid-template-columns:repeat(5,1fr);background:var(--surface);border-top:1px solid var(--line);padding:6px 6px 14px}
+.tabbar button{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:600;color:var(--ink-2);padding:4px 0;border-radius:12px}
+.tabbar button svg{width:24px;height:24px}
+.tabbar button.on{color:var(--leaf)}
+.tabbar button.scan span.ring{width:46px;height:46px;border-radius:50%;background:var(--leaf);color:var(--on-leaf);display:grid;place-items:center;margin-top:-18px;border:4px solid var(--surface)}
+.tabbar button.scan.on span.ring{background:var(--ink);color:var(--bg)}
+
+/* Headers */
+.lt{display:flex;justify-content:space-between;align-items:flex-end;padding:10px 20px 12px;gap:12px}
+.lt h1{font-size:32px;font-weight:800;line-height:1.05}
+.eyebrow{font-size:13px;font-weight:600;color:var(--ink-2)}
+.nav{position:sticky;top:0;z-index:2;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:8px 12px;background:var(--bg);border-bottom:1px solid var(--line)}
+.nav .back{display:inline-flex;align-items:center;gap:2px;color:var(--leaf);font-weight:600;padding:6px 4px;justify-self:start}
+.nav .back svg{width:20px;height:20px}
+.nav-title{font-family:var(--display);font-weight:700;font-size:17px;max-width:190px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-right{justify-self:end}
+.iconbtn{width:40px;height:40px;border-radius:50%;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center;color:var(--leaf);flex:none}
+.iconbtn svg{width:20px;height:20px}
+.pad{padding:0 16px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.sec{padding:0 16px;margin-top:22px}
+.sec>h2{font-size:20px;font-weight:700;margin-bottom:10px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.sec>h2 small{font:600 13px var(--body);color:var(--ink-2)}
+.sub{color:var(--ink-2);font-size:13px}
+
+/* Controls */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--leaf);color:var(--on-leaf);font-weight:700;padding:11px 16px;border-radius:14px;min-height:44px;text-align:center}
+.btn svg{width:18px;height:18px;flex:none}
+.btn.ghost{background:var(--surface);color:var(--leaf-ink);border:1px solid var(--line)}
+.btn.soft{background:var(--leaf-soft);color:var(--leaf-ink)}
+.btn.water{background:var(--water);color:#fff}
+.btn.sm{min-height:34px;padding:6px 12px;border-radius:11px;font-size:13px}
+.btn.block{display:flex;width:100%}
+.btn[disabled]{opacity:.45;cursor:default}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+.btnrow>.btn{flex:1}
+.seg{display:flex;background:var(--surface-2);border-radius:12px;padding:3px;gap:2px}
+.seg button{flex:1;text-align:center;padding:7px 6px;border-radius:9px;font-weight:600;font-size:13px;color:var(--ink-2)}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:6px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--ink-2)}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.02em;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill.thriving{background:var(--leaf-soft);color:var(--leaf-ink)}
+.pill.okay{background:var(--surface-2);color:var(--ink-2)}
+.pill.thirsty{background:var(--water-soft);color:var(--water-ink)}
+.pill.wilting{background:var(--sun-soft);color:var(--sun-ink)}
+.pill.sick{background:var(--alert-soft);color:var(--alert-ink)}
+.pill.plain::before{display:none}
+.pts{display:inline-flex;align-items:center;gap:4px;background:var(--sun-soft);color:var(--sun-ink);font-weight:700;font-size:13px;padding:4px 10px;border-radius:999px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pts::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--sun)}
+
+/* Cards and lists */
+.card{background:var(--surface);border-radius:var(--r);padding:14px;border:1px solid var(--line)}
+.list{background:var(--surface);border-radius:var(--r);border:1px solid var(--line);overflow:hidden}
+.row{display:flex;align-items:center;gap:12px;padding:12px 14px;width:100%;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row .grow{flex:1;min-width:0}
+.row .t{font-weight:600}
+.chev{color:var(--ink-2);width:16px;height:16px;flex:none}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--leaf-soft);color:var(--leaf-ink);display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+.avatar.me{background:var(--ink);color:var(--bg)}
+.avatar.lg{width:72px;height:72px;font:800 26px var(--display)}
+
+/* Buddies */
+.hero{margin:0 16px;border-radius:26px;padding:16px;display:grid;grid-template-columns:132px 1fr;gap:6px;align-items:center;background:var(--surface);border:1px solid var(--line);position:relative;overflow:hidden}
+.hero.wilting{background:var(--sun-soft);border-color:transparent}
+.hero.sick{background:var(--alert-soft);border-color:transparent}
+.hero.thirsty{background:var(--water-soft);border-color:transparent}
+.hero.thriving,.hero.okay{background:var(--leaf-soft);border-color:transparent}
+.hero h2{font-size:24px;font-weight:800;line-height:1.1}
+.bubble{position:relative;background:var(--surface);border-radius:16px;padding:10px 12px;font-size:15px;font-weight:500;line-height:1.3;margin:8px 0 10px}
+.bubble::before{content:"";position:absolute;left:-7px;top:18px;width:14px;height:14px;background:var(--surface);transform:rotate(45deg);border-radius:3px}
+.bubble.down::before{left:50%;top:auto;bottom:-6px;margin-left:-7px}
+.plant{overflow:visible}
+.plant .sway{transform-origin:60px 82px;animation:breathe 4.5s ease-in-out infinite alternate}
+@keyframes breathe{from{transform:rotate(-1.6deg)}to{transform:rotate(1.6deg)}}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px}
+.bcard{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:12px 12px 14px;display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:100%}
+.bcard .plant{align-self:center}
+.bcard .n{font:700 18px var(--display)}
+.sumrow{display:flex;gap:8px;padding:14px 16px 10px;flex-wrap:wrap}
+
+/* Plant detail */
+.phead{display:flex;flex-direction:column;align-items:center;text-align:center;padding:14px 20px 4px;gap:4px}
+.phead h1{font-size:30px;font-weight:800;display:flex;align-items:center;gap:8px}
+.phead .edit{width:30px;height:30px;border-radius:50%;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-2)}
+.phead .edit svg{width:15px;height:15px}
+.phead .bubble{max-width:290px;margin:4px 0 2px}
+.meter{display:grid;grid-template-columns:28px 1fr;gap:4px 10px;align-items:center;padding:12px 14px;border-top:1px solid var(--line)}
+.meter:first-child{border-top:0}
+.meter .ic{width:28px;height:28px;border-radius:9px;display:grid;place-items:center}
+.meter .ic svg{width:16px;height:16px}
+.meter .top{display:flex;justify-content:space-between;gap:8px;font-weight:600}
+.meter .top span:last-child{color:var(--ink-2);font-weight:500;font-size:13px;text-align:right}
+.bar{grid-column:2;height:7px;border-radius:4px;background:var(--surface-2);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:4px}
+.step{display:grid;grid-template-columns:28px 1fr;gap:10px;padding:12px 14px;border-top:1px solid var(--line);width:100%;align-items:start}
+.step:first-child{border-top:0}
+.step .num{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-weight:700;font-size:13px;color:var(--ink-2)}
+.step.done .num{background:var(--leaf);border-color:var(--leaf);color:var(--on-leaf)}
+.step.done .num svg{width:14px;height:14px}
+.step .t{font-weight:600}
+.step.done .t{text-decoration:line-through;color:var(--ink-2)}
+
+/* Forum and community */
+.search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:0 12px;height:42px}
+.search svg{width:18px;height:18px;color:var(--ink-2);flex:none}
+.search input{flex:1;border:0;background:none;outline:0;min-width:0;height:100%}
+.qrow{display:grid;grid-template-columns:44px 1fr;gap:10px;padding:12px 14px;border-top:1px solid var(--line);width:100%;align-items:start}
+.qrow:first-child{border-top:0}
+.votebox{display:flex;flex-direction:column;align-items:center;border-radius:11px;background:var(--surface-2);padding:5px 0;font-weight:700;font-size:13px;font-variant-numeric:tabular-nums;color:var(--ink-2);width:44px}
+.votebox svg{width:16px;height:16px}
+.votebox.on{background:var(--leaf-soft);color:var(--leaf-ink)}
+.vote{display:flex;flex-direction:column;align-items:center;gap:1px;width:44px;flex:none;font-weight:700;font-variant-numeric:tabular-nums}
+.vote button{width:36px;height:28px;border-radius:9px;display:grid;place-items:center;color:var(--ink-2);background:var(--surface-2)}
+.vote button svg{width:16px;height:16px}
+.vote button.up.on{background:var(--leaf);color:var(--on-leaf)}
+.vote button.dn.on{background:var(--alert);color:#fff}
+.post{display:flex;gap:10px;padding:14px;border-top:1px solid var(--line)}
+.post:first-child{border-top:0}
+.post h3{font-size:17px;font-weight:700;line-height:1.2;margin:4px 0}
+.tag{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--leaf-ink)}
+.tag.q{color:var(--water-ink)} .tag.show{color:var(--sun-ink)}
+.meta{font-size:13px;color:var(--ink-2);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.lvl{font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
+.answer{display:flex;gap:10px;padding:14px;border-top:1px solid var(--line)}
+.answer:first-child{border-top:0}
+.answer.mine{background:var(--leaf-soft)}
+textarea,input[type=text],select{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:44px}
+textarea{min-height:88px;resize:vertical}
+.fld{display:flex;flex-direction:column;gap:6px}
+.fld>span{font-size:13px;font-weight:600;color:var(--ink-2)}
+.form{display:flex;flex-direction:column;gap:14px}
+.stepper{display:flex;align-items:center;gap:6px}
+.stepper button{width:44px;height:44px;border-radius:12px;background:var(--surface-2);font-size:22px;font-weight:600;text-align:center}
+.stepper output{flex:1;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+.rank{width:22px;text-align:center;font:700 17px var(--display);color:var(--ink-2);font-variant-numeric:tabular-nums}
+.row.me{background:var(--leaf-soft)}
+
+/* Camera */
+.cam{position:absolute;inset:0;background:#000;color:#fff;overflow:hidden}
+.scene{position:absolute;inset:0;width:100%;height:100%}
+.scene .world{animation:sway 7s ease-in-out infinite alternate}
+@keyframes sway{from{transform:translate(-3px,2px)}to{transform:translate(3px,-2px)}}
+.scene .ret{animation:lock 1.6s ease-in-out infinite alternate}
+@keyframes lock{from{opacity:.75}to{opacity:1}}
+.scene .scanline{animation:scan 1.3s ease-in-out infinite alternate}
+@keyframes scan{from{transform:translateY(0)}to{transform:translateY(var(--h))}}
+.scene text{font:700 13px var(--body)}
+.scene [data-a]{cursor:pointer}
+.media{position:absolute;inset:0;background:#000}
+.media video,.media img{width:100%;height:100%;object-fit:cover;display:block}
+.marks{position:absolute;inset:0}
+.cam-tap{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair}
+.mark{position:absolute;width:150px;height:170px;transform:translate(-50%,-50%);pointer-events:none;color:#fff}
+.mark.sm{width:84px;height:96px}
+.mark.on{color:#F2B01E}
+.mark.busy{background:rgba(76,194,127,.16)}
+.mark svg{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 1px 2px rgba(0,0,0,.7));animation:lock 1.6s ease-in-out infinite alternate}
+.mk-label{position:absolute;left:50%;bottom:100%;transform:translate(-50%,-6px);background:rgba(0,0,0,.62);color:#fff;font:700 13px var(--body);padding:4px 11px;border-radius:999px;white-space:nowrap;pointer-events:auto;display:inline-flex;gap:6px;align-items:center}
+.mark.sm .mk-label{font-size:11px;padding:3px 8px}
+.mark.on .mk-label{background:#F2B01E;color:#2B1C00}
+.mk-label i{width:8px;height:8px;border-radius:50%}
+.mk-conf{opacity:.8;font-variant-numeric:tabular-nums}
+.mk-scan{position:absolute;left:0;right:0;top:0;height:4px;border-radius:2px;background:#7CF2AE;box-shadow:0 0 12px #7CF2AE;animation:mkscan 1.3s ease-in-out infinite alternate}
+@keyframes mkscan{to{top:calc(100% - 4px)}}
+.wsweep{position:absolute;left:0;right:0;top:0;height:3px;background:#7CF2AE;box-shadow:0 0 14px #7CF2AE;animation:wsweep 1.8s linear infinite alternate}
+@keyframes wsweep{to{top:calc(100% - 3px)}}
+.filepick{position:relative}
+.filepick input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.cam-top{position:absolute;top:10px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:center}
+.cam-chip{background:rgba(0,0,0,.55);color:#fff;padding:6px 12px;border-radius:999px;font-size:13px;font-weight:600;display:inline-flex;gap:7px;align-items:center}
+.cam-chip i{width:8px;height:8px;border-radius:50%;background:#A9B4AD}
+.cam-chip i.rec{background:#FF5A4F}
+.cam-chip svg{width:14px;height:14px}
+.cam-roll .thumb img,.photo img{width:100%;height:100%;object-fit:cover;display:block}
+.cam-roll{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.55);padding:4px 12px 4px 4px;border-radius:999px;font-size:13px;font-weight:700;color:#fff}
+.cam-roll .thumb{width:32px;height:32px;border-radius:50%;overflow:hidden;position:relative}
+.cam-pop{position:absolute;top:58px;left:12px;right:12px;background:var(--surface);color:var(--ink);border-radius:20px;padding:12px;display:grid;grid-template-columns:64px 1fr;gap:10px;box-shadow:0 12px 30px rgba(0,0,0,.35);animation:pop .2s ease-out}
+@keyframes pop{from{transform:translateY(-8px) scale(.97)}to{transform:none}}
+.cam-pop h3{font-size:20px;font-weight:800;line-height:1.1}
+.cam-pop .facts{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 8px}
+.cam-pop .x{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;color:var(--ink-2)}
+.cam-pop .x svg{width:14px;height:14px}
+.fact{font-size:11px;font-weight:600;background:var(--surface-2);border-radius:8px;padding:3px 7px;color:var(--ink-2)}
+.cam-bottom{position:absolute;left:0;right:0;bottom:0;padding:26px 16px 16px;display:flex;flex-direction:column;align-items:center;gap:12px;background:linear-gradient(transparent,rgba(0,0,0,.75) 45%)}
+.cam-hint{font-size:13px;font-weight:600;text-shadow:0 1px 3px rgba(0,0,0,.6);text-align:center}
+.cam-bottom .seg{background:rgba(255,255,255,.18);width:100%;max-width:300px}
+.cam-bottom .seg button{color:#fff}
+.cam-bottom .seg button.on{background:#fff;color:#111}
+.shutter{width:66px;height:66px;border-radius:50%;background:#fff;border:5px solid rgba(255,255,255,.4);background-clip:padding-box}
+.shutter:active{transform:scale(.94)}
+.flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+.flash.go{animation:flash .35s ease-out}
+@keyframes flash{from{opacity:.9}to{opacity:0}}
+.photos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.photo{aspect-ratio:1;border-radius:14px;overflow:hidden;position:relative;background:#000}
+.photo span{position:absolute;left:0;right:0;bottom:0;padding:14px 6px 5px;font-size:11px;font-weight:600;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.7))}
+
+/* Gardens and map */
+.gcard{display:block;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:14px}
+.gcard h3{font-size:20px;font-weight:700;line-height:1.15}
+.gcard .mini{display:flex;align-items:flex-end;margin:8px 0 2px;gap:0}
+.gcard .mini .plant{margin-right:-8px}
+.gtop{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.task{display:flex;align-items:center;gap:12px;padding:12px 14px;border-top:1px solid var(--line)}
+.task:first-child{border-top:0}
+.task .dot{width:10px;height:10px;border-radius:50%;flex:none}
+.logrow{display:grid;grid-template-columns:36px 1fr;gap:10px;padding:12px 14px;border-top:1px solid var(--line)}
+.logrow:first-child{border-top:0}
+.logrow .ic{width:36px;height:36px;border-radius:12px;background:var(--surface-2);display:grid;place-items:center;color:var(--ink-2)}
+.logrow .ic svg{width:18px;height:18px}
+.logrow .ic.w{background:var(--water-soft);color:var(--water-ink)}
+.logrow .next{color:var(--leaf-ink);font-weight:600;font-size:13px}
+.map{border-radius:22px;overflow:hidden;border:1px solid var(--line);background:var(--surface-2)}
+.map svg{width:100%;height:auto}
+.m-land{fill:var(--surface-2)} .m-road{stroke:var(--surface);fill:none;stroke-linecap:round}
+.m-river{stroke:var(--water-soft);fill:none;stroke-linecap:round} .m-park{fill:var(--leaf-soft)}
+.m-label{fill:var(--ink-2);font:600 10px var(--body)}
+.m-pin{cursor:pointer}
+.m-pulse{animation:pulse 1.8s ease-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes pulse{from{transform:scale(.6);opacity:.7}to{transform:scale(2.1);opacity:0}}
+.acard{border-left:5px solid var(--alert)}
+.acard.med{border-left-color:var(--sun)}
+.acard h3{font-size:17px;font-weight:700;line-height:1.2}
+.banner{background:var(--sun-soft);color:var(--sun-ink);border-radius:14px;padding:10px 12px;font-size:13px;font-weight:600}
+
+/* Profile */
+.prof{display:flex;gap:14px;align-items:center;padding:6px 20px 0}
+.prof h1{font-size:26px;font-weight:800;line-height:1.1}
+.levelcard{background:var(--ink);color:var(--bg);border-radius:24px;padding:16px;margin:16px 16px 0}
+.levelcard .big{font:800 34px/1 var(--display);font-variant-numeric:tabular-nums}
+.levelcard .bar{background:rgba(127,127,127,.35);height:9px;margin:10px 0 6px}
+.levelcard .bar i{background:var(--sun)}
+.levelcard .lv{display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+.levelcard .name{font:700 20px var(--display)}
+.levelcard small{opacity:.75;font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px 12px}
+.stat b{display:block;font:800 22px var(--display);font-variant-numeric:tabular-nums}
+.stat span{font-size:11px;color:var(--ink-2);font-weight:600}
+.reward{display:flex;align-items:center;gap:12px;padding:12px 14px;border-top:1px solid var(--line)}
+.reward:first-child{border-top:0}
+.code{font:700 22px ui-monospace,Menlo,monospace;letter-spacing:.08em;background:var(--surface-2);border-radius:12px;padding:14px;text-align:center}
+
+/* Sheets and toasts */
+#sheet-root{position:absolute;inset:0;pointer-events:none;z-index:10}
+#sheet-root>*{pointer-events:auto}
+.backdrop{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+.backdrop.in{animation:fade .2s ease-out}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:90%;background:var(--bg);border-radius:26px 26px 0 0;display:flex;flex-direction:column}
+.sheet.full{height:94%}
+.sheet.in{animation:rise .26s cubic-bezier(.2,.8,.2,1)}
+@keyframes rise{from{transform:translateY(60%)}to{transform:none}}
+.grab{width:38px;height:5px;border-radius:3px;background:var(--line);margin:8px auto 0;flex:none}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;padding:10px 16px 8px;gap:10px;flex:none}
+.sheet-head h2{font-size:22px;font-weight:800;line-height:1.1}
+.sheet-head button{width:32px;height:32px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;color:var(--ink-2);flex:none}
+.sheet-head button svg{width:15px;height:15px}
+.sheet-body{overflow-y:auto;padding:4px 16px 22px;display:flex;flex-direction:column;gap:14px}
+.dx-top{display:grid;grid-template-columns:84px 1fr;gap:12px;align-items:center}
+.dx-scan{position:relative;display:grid;place-items:center;padding:20px 0}
+.dx-scan::after{content:"";position:absolute;left:25%;right:25%;top:12%;height:3px;background:var(--leaf);border-radius:2px;box-shadow:0 0 14px var(--leaf);animation:dxscan 1s ease-in-out infinite alternate}
+@keyframes dxscan{to{top:82%}}
+.fix{counter-reset:f;display:flex;flex-direction:column;gap:8px;padding:0;list-style:none}
+.fix li{counter-increment:f;display:grid;grid-template-columns:24px 1fr;gap:8px}
+.fix li::before{content:counter(f);width:22px;height:22px;border-radius:50%;background:var(--surface-2);font-weight:700;font-size:13px;display:grid;place-items:center}
+.prod{padding:12px 14px;border-top:1px solid var(--line)}
+.prod:first-child{border-top:0}
+.prod .stores{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.wsteps{display:flex;gap:6px}
+.wsteps i{flex:1;height:4px;border-radius:2px;background:var(--surface-2)}
+.wsteps i.on{background:var(--leaf)}
+.wscan{position:relative;height:390px;border-radius:20px;overflow:hidden;background:#000}
+.wscan .count{position:absolute;left:10px;bottom:10px;background:rgba(0,0,0,.6);color:#fff;font-weight:700;padding:6px 12px;border-radius:999px;font-size:13px}
+#toast-root{position:absolute;top:50px;left:12px;right:12px;display:flex;flex-direction:column;gap:6px;align-items:center;z-index:20;pointer-events:none}
+.toast{background:var(--ink);color:var(--bg);padding:9px 14px;border-radius:999px;font-weight:600;font-size:13px;box-shadow:0 8px 20px rgba(0,0,0,.25);animation:drop .25s ease-out;max-width:100%;text-align:center}
+.toast.pts{background:var(--sun);color:#3A2500}
+.toast.lvl{background:var(--leaf);color:var(--on-leaf)}
+.toast.out{opacity:0;transition:opacity .3s}
+@keyframes drop{from{transform:translateY(-12px);opacity:0}to{transform:none;opacity:1}}
+@media (max-width:480px){#toast-root{top:10px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="phone" id="phone">
+    <div class="statusbar" aria-hidden="true">
+      <span>9:41</span><span class="island"></span>
+      <span class="sys">
+        <svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/><rect x="5" y="5" width="3" height="7" rx="1" fill="currentColor"/><rect x="10" y="2.5" width="3" height="9.5" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor"/></svg>
+        <svg width="26" height="12" viewBox="0 0 26 12"><rect x=".5" y=".5" width="22" height="11" rx="3.5" fill="none" stroke="currentColor" opacity=".5"/><rect x="2" y="2" width="17" height="8" rx="2" fill="currentColor"/><rect x="24" y="4" width="2" height="4" rx="1" fill="currentColor" opacity=".5"/></svg>
+      </span>
+    </div>
+    <main class="screen" id="screen"></main>
+    <nav class="tabbar" id="tabbar" aria-label="Main"></nav>
+    <div id="sheet-root"></div>
+    <div id="toast-root" aria-live="polite"></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const NOW = new Date();
+const todayStr = `${DAYS[NOW.getDay()]}, ${MONTHS[NOW.getMonth()]} ${NOW.getDate()}`;
+function whenText(ago){
+  if (ago <= 0) return 'today';
+  if (ago <= 7){ const d = new Date(NOW); d.setDate(d.getDate() - ago); return 'on ' + DAYS[d.getDay()]; }
+  if (ago < 14) return 'last week';
+  return Math.round(ago / 7) + ' weeks ago';
+}
+const sinceTuesday = (() => { const d = (NOW.getDay() - 2 + 7) % 7; return d === 0 ? 7 : d; })();
+function mix(a, b, t){
+  const p = h => [1,3,5].map(i => parseInt(h.slice(i, i + 2), 16));
+  const [x, y] = [p(a), p(b)];
+  return '#' + x.map((v, i) => Math.round(v + (y[i] - v) * t).toString(16).padStart(2, '0')).join('');
+}
+const I = {
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  chev:'<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l6-6 6 6"/></svg>',
+  down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10l6 6 6-6"/></svg>',
+  search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>',
+  pencil:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4L16 5l3 3L8 19z"/></svg>',
+  drop:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c4 5 6 8 6 11a6 6 0 0 1-12 0c0-3 2-6 6-11z"/></svg>',
+  sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3L7 7M17 17l1.7 1.7M18.7 5.3L17 7M7 17l-1.7 1.7"/></svg>',
+  feed:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-9M12 12c0-4 3-7 7-7 0 4-3 7-7 7zM12 15c0-3-2-5-6-5 0 3 2 5 6 5z"/></svg>',
+  scanIc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg>',
+  tool:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 6l4 4M4 20l9-9M13 7l2-3 5 5-3 2z"/></svg>',
+  tBuddies:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14V8M12 9c0-3 2-5 5-5 0 3-2 5-5 5zM12 11c0-2-2-4-5-4 0 2 2 4 5 4z"/><path d="M6 14h12l-1.5 6h-9z"/></svg>',
+  tGardens:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+  tCommunity:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h11a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H9l-4 3v-3H4z"/><path d="M17 9h3v9l-3-2h-5"/></svg>',
+  tProfile:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>',
+};
+
+/* ---------- reference data ---------- */
+const SUNS = ['Full sun','Part shade','Shade'];
+const SOILS = ['Loamy, well-drained','Rich and moist','Sandy, fast-draining','Potting mix'];
+const FERTS = ['Compost monthly','Tomato feed every 2 weeks','Balanced feed monthly','None needed'];
+const CARE = {
+  tomato:{species:'Tomato',latin:'Solanum lycopersicum',every:3,sun:'Full sun',soil:'Rich and moist',fert:'Tomato feed every 2 weeks',hours:'6 to 8 hours',steps:[
+    ['Water deeply at the base','Every 3 days, more in a heat wave. Keep the leaves dry.'],['Tie new growth to the stake','Loose loops every 20 cm so stems do not snap under fruit.'],['Pinch out suckers','Remove the small shoots between the main stem and branches.'],['Feed every two weeks','Use tomato feed once the first flowers appear.']]},
+  basil:{species:'Sweet basil',latin:'Ocimum basilicum',every:3,sun:'Full sun',soil:'Rich and moist',fert:'Compost monthly',hours:'6 hours',steps:[
+    ['Water when the top 2 cm is dry','Basil droops fast but recovers within hours of a drink.'],['Pinch off flower buds','Flowering turns the leaves bitter.'],['Harvest from the top','Cut just above a pair of leaves so it branches out.']]},
+  kale:{species:'Curly kale',latin:'Brassica oleracea',every:4,sun:'Part shade',soil:'Loamy, well-drained',fert:'Compost monthly',hours:'4 to 6 hours',steps:[
+    ['Water every 4 days','Aim for steady moisture. Dry spells make the leaves tough.'],['Check under the leaves for pests','Aphids and cabbage worms hide on the underside.'],['Harvest the outer leaves first','Leave the centre to keep growing.']]},
+  rosemary:{species:'Rosemary',latin:'Salvia rosmarinus',every:14,sun:'Full sun',soil:'Sandy, fast-draining',fert:'None needed',hours:'6 to 8 hours',steps:[
+    ['Water every two weeks','Let the soil dry out completely between waterings. Wet roots kill rosemary.'],['Trim soft tips after flowering','Never cut back into bare woody stems.'],['Keep mulch away from the stem','It holds moisture where rosemary hates it.']]},
+  sunflower:{species:'Sunflower',latin:'Helianthus annuus',every:4,sun:'Full sun',soil:'Loamy, well-drained',fert:'Compost monthly',hours:'8 hours',steps:[
+    ['Water deeply every 4 days','Soak the ground 10 cm out from the stem to push roots wide.'],['Stake once it passes knee height','Tie loosely. The head gets heavy.'],['Leave the head for the birds','Or cover it with mesh if you want the seeds.']]},
+  pepper:{species:'Bell pepper',latin:'Capsicum annuum',every:3,sun:'Full sun',soil:'Rich and moist',fert:'Tomato feed every 2 weeks',hours:'6 to 8 hours',steps:[
+    ['Water every 3 days','Even moisture prevents blossom end rot.'],['Support branches with fruit','A small cage or stake stops them splitting.'],['Pick the first peppers early','It tells the plant to make more.']]},
+  fern:{species:'Boston fern',latin:'Nephrolepis exaltata',every:5,sun:'Shade',soil:'Potting mix',fert:'Balanced feed monthly',hours:'Bright shade',steps:[
+    ['Water every 5 days','Keep the soil damp, never soggy.'],['Mist the fronds twice a week','Dry air turns the tips brown.'],['Snip off brown fronds at the base','New ones grow from the centre.']]},
+  succulent:{species:'Echeveria',latin:'Echeveria elegans',every:21,sun:'Full sun',soil:'Sandy, fast-draining',fert:'None needed',hours:'6 hours',steps:[
+    ['Water every 3 weeks','Soak it, then let it dry out fully.'],['Turn the pot a quarter each week','It keeps the rosette from leaning toward the window.'],['Pull off dried lower leaves','They can hide mealybugs.']]},
+};
+const ISSUES = {
+  aphids:{name:'Aphids',conf:92,sev:'Moderate',what:'Small sap-sucking insects clustered under the leaves. They multiply quickly and move to neighbouring beds.',
+    fix:['Blast the undersides of the leaves with water to knock them off.','Spray insecticidal soap every 3 days for two weeks.','Check the plants on either side. Aphids travel.'],
+    products:[['Insecticidal soap spray, 1 L',[['Home Depot','$12.98'],["Lowe's",'$11.97']]],['Neem oil concentrate, 250 mL',[['Home Depot','$16.47'],["Lowe's",'$17.99']]]]},
+  blight:{name:'Early blight',conf:87,sev:'Moderate',what:'A fungal disease. Brown spots with target-like rings start on the lowest leaves and climb the plant.',
+    fix:['Remove spotted leaves and put them in the garbage, not the compost.','Water at the base so the leaves stay dry.','Apply copper fungicide weekly until new growth comes in clean.','Mulch under the plant to stop soil splashing up.'],
+    products:[['Copper fungicide spray, 946 mL',[['Home Depot','$14.98'],["Lowe's",'$13.48']]],['Bypass pruning shears',[['Home Depot','$19.97'],["Lowe's",'$18.98']]],['Straw mulch, 2.5 cu ft',[["Lowe's",'$9.98']]]]},
+  dry:{name:'Underwatering',conf:95,sev:'Mild',what:'The soil is dry several centimetres down and the leaves have lost pressure. Most plants recover within a day of a deep drink.',
+    fix:['Water slowly at the base until it drains through.','Check the soil with a finger before the next watering.','Add mulch to hold moisture between visits.'],
+    products:[['Soil moisture meter',[['Home Depot','$13.98'],["Lowe's",'$12.98']]],['Self-watering spikes, 4 pack',[['Home Depot','$15.49']]]]},
+};
+const MOOD = {
+  thriving:{label:'Thriving',droop:1,tint:0,health:96},
+  okay:{label:'Content',droop:1.12,tint:.1,health:84},
+  thirsty:{label:'Thirsty',droop:1.5,tint:.35,health:61},
+  wilting:{label:'Wilting',droop:1.95,tint:.7,health:37},
+  sick:{label:'Unwell',droop:1.35,tint:.3,health:54},
+};
+const VTOP = {sunflower:-14,tomato:6,pepper:6,rosemary:22,fern:24,basil:34,kale:32,succulent:44};
+const POTS = ['#C96B4B','#3D7EA6','#D99A1C','#8A68AB','#D2596C','#4F8F74'];
+const LEVELS = [['Seedling',0],['Sprout',250],['Gardener',750],['Grower',1500],['Master Farmer',3000]];
+const EARN = [['Answer a question',15],['Get an upvote on your answer',5],['Share a tip or post',10],['Log a garden task',10],['Help with a nearby alert',20],['Add and name a plant',20],['Set up a garden',50]];
+
+/* ---------- live recognition settings ---------- */
+// Paste a Teachable Machine image model link here to load it for every viewer,
+// or leave it empty and paste the link in the app under Scan > camera source.
+const DEFAULT_MODEL_URL = '';
+const REC_MIN = 0.8, REC_STREAK = 3, REC_MISSES = 4, REC_EVERY = 250;
+const REC_LIBS = [
+  ['tf', ['https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js', 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js']],
+  ['tmImage', ['https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8.5/dist/teachablemachine-image.min.js', 'https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js']],
+];
+
+/* ---------- sample state ---------- */
+const mk = (id, name, kind, where, last, o = {}) => ({id, name, kind, where, last, fed:12, mine:false, pot:0, bed:'', note:'', issue:null,
+  every:CARE[kind].every, sun:CARE[kind].sun, soil:CARE[kind].soil, fert:CARE[kind].fert, ...o});
+const S = {
+  tab:'buddies',
+  nav:{buddies:[],gardens:[],scan:[],community:[],profile:[]},
+  sheet:null,
+  seg:{plant:'care',gardens:'mine',community:'feed',map:'all',sort:'hot'},
+  scan:{mode:'identify',sel:null,busy:null},
+  cam:{src:'sample',photo:null,marks:[],n:0,blocked:false,tried:false},
+  rec:{url:DEFAULT_MODEL_URL,status:'off',err:'',labels:[],map:{},cand:null,streak:0,misses:0,locked:null,dismissed:null},
+  mapSel:null, checks:{}, forumQ:'',
+  user:{name:'Maya Chen',handle:'maya_grows',pts:860,xp:1445,answers:14,upvotes:63,tasks:27,
+    history:[{n:15,why:'Answered a question about basil',when:'Yesterday'},{n:5,why:'Upvote from @dana_o',when:'Yesterday'},{n:10,why:'Watered Sunny',when:'Sunday'},{n:10,why:'Shared a tip',when:'Last week'}]},
+  plants:[
+    mk('fern','Fernando','fern','home',9,{mine:true,pot:3}),
+    mk('kaleb','Kale-b','kale','g1',2,{mine:true,pot:1,bed:'Bed 2',issue:'aphids'}),
+    mk('herb','Herb','basil','g1',5,{mine:true,pot:2,bed:'Bed 3'}),
+    mk('bob','Bob','rosemary','g1',sinceTuesday,{mine:true,pot:0,bed:'Bed 3',note:'Established plant. Resist the urge to water.'}),
+    mk('spike','Spike','succulent','home',6,{mine:true,pot:4}),
+    mk('sunny','Sunny','sunflower','g1',3,{pot:2,bed:'Bed 1'}),
+    mk('tomas','Tomás','tomato','g1',2,{pot:4,bed:'Bed 1',issue:'blight'}),
+    mk('u1','','pepper','g1',1,{pot:5,bed:'Bed 1',unnamed:true}),
+    mk('m1','Marinara','tomato','g2',1,{pot:0}), mk('m2','Pesto','basil','g2',2,{pot:5}), mk('m3','Goldie','sunflower','g2',6,{pot:1}), mk('m4','Sgt. Pepper','pepper','g2',1,{pot:3}),
+    mk('n1','Kale Me Maybe','kale','g3',1,{pot:2}), mk('n2','Rosie','rosemary','g3',5,{pot:4}), mk('n3','Big Red','tomato','g3',4,{pot:1}),
+    mk('c1','Prickles','succulent','g4',10,{pot:0}), mk('c2','Frond','fern','g4',1,{pot:5}), mk('c3','Basil Jr.','basil','g4',1,{pot:3}),
+  ],
+  gardens:[
+    {id:'g1',name:'Riverside Community Garden',role:'volunteer',sup:'Dana Okafor',dist:'0.3 km',beds:6,code:'SPROUT-2291',about:'Six raised beds beside the river trail. Open to volunteers every day.',
+      people:[['Dana Okafor','Supervisor'],['Maya Chen','You'],['Tom Kowalski','Volunteer'],['Priya Raman','Volunteer'],['Sam Idowu','Volunteer']],
+      tasks:[{id:'t1',text:'Turn the compost pile',sub:'Last turned two weeks ago'},{id:'t2',text:'Tie Sunny to a taller stake',sub:'Wind forecast for the weekend'}]},
+    {id:'g2',name:'Maple Street Rooftop Plots',role:null,sup:'Leo Martins',dist:'0.9 km',beds:10,code:'',about:'Container beds on the co-op roof. Lots of sun, lots of wind.',people:[['Leo Martins','Supervisor'],['Ana Sousa','Volunteer'],['Jin Park','Volunteer']],tasks:[]},
+    {id:'g3',name:"Northgate Seniors' Garden",role:null,sup:'Ruth Abara',dist:'1.4 km',beds:8,code:'',about:'Waist-height beds built for easy reach. Volunteers help with heavy lifting.',people:[['Ruth Abara','Supervisor'],['Omar Haddad','Volunteer']],tasks:[]},
+    {id:'g4',name:'Campus Greenhouse Co-op',role:null,sup:'Sam Idowu',dist:'1.8 km',beds:4,code:'',about:'A student-run greenhouse. Indoor plants and seedlings all year.',people:[['Sam Idowu','Supervisor'],['Li Wei','Volunteer'],['Noor Aziz','Volunteer']],tasks:[]},
+  ],
+  log:[
+    {g:'g1',plant:'bob',action:'Watered',who:'Dana',days:sinceTuesday,note:'Soil was still damp underneath.'},
+    {g:'g1',plant:'kaleb',action:'Checked for pests',who:'Tom',days:1,note:'Found aphids on the underside. Flagged for treatment.'},
+    {g:'g1',plant:'sunny',action:'Watered',who:'You',days:3,note:''},
+    {g:'g1',plant:null,action:'Weeded beds 1 to 3',who:'Priya',days:4,note:''},
+    {g:'g1',plant:'herb',action:'Watered',who:'Sam',days:5,note:'Pinched off two flower buds.'},
+    {g:'home',plant:'spike',action:'Watered',who:'You',days:6,note:''},
+    {g:'home',plant:'fern',action:'Watered',who:'You',days:9,note:''},
+  ],
+  forum:{
+    tomato:[
+      {id:'q1',q:'Why are the bottom leaves turning yellow with brown spots?',by:'tom_k',votes:34,voted:false,answers:[
+        {by:'dana_o',lvl:'Master Farmer',text:'That is early blight. Look for rings inside the spots, like a target. Strip the affected leaves, keep water off the foliage and use copper fungicide weekly.',votes:41,voted:false},
+        {by:'sam_seeds',lvl:'Sprout',text:'Could also be overwatering if there are no rings. Check whether the soil is soggy.',votes:8,voted:false}]},
+      {id:'q2',q:'How often should I water during a heat wave?',by:'ana_s',votes:19,voted:false,answers:[
+        {by:'priya_plants',lvl:'Grower',text:'Daily, early in the morning, and deep. Mulch makes a bigger difference than extra water.',votes:22,voted:false}]},
+      {id:'q3',q:'Do I really need to pinch off suckers?',by:'jin_p',votes:11,voted:false,answers:[
+        {by:'leo_grows',lvl:'Grower',text:'For vining types, yes, or you get a jungle and small fruit. Bush types can be left alone.',votes:15,voted:false}]},
+      {id:'q4',q:'Is it safe to compost leaves with blight?',by:'omar_h',votes:6,voted:false,answers:[]},
+    ],
+    basil:[
+      {id:'q1',q:'My basil keeps flowering. Should I cut the flowers off?',by:'li_wei',votes:27,voted:false,answers:[
+        {by:'maya_grows',lvl:'Gardener',text:'Yes. Pinch them as soon as you see buds, and take the pair of leaves below too. It will branch and stay sweet.',votes:18,voted:false,mine:true},
+        {by:'dana_o',lvl:'Master Farmer',text:'Agree. If it has fully flowered, cut the plant back by a third.',votes:9,voted:false}]},
+      {id:'q2',q:'Leaves droop by afternoon but look fine in the morning. Normal?',by:'noor_a',votes:12,voted:false,answers:[
+        {by:'priya_plants',lvl:'Grower',text:'Normal in full sun on hot days. If it is still drooping at dusk, it needs water.',votes:14,voted:false}]},
+      {id:'q3',q:'Can basil share a pot with tomatoes?',by:'tom_k',votes:5,voted:false,answers:[]},
+    ],
+    kale:[
+      {id:'q1',q:'Tiny green bugs under the leaves. What are they?',by:'ruth_a',votes:22,voted:false,answers:[
+        {by:'dana_o',lvl:'Master Farmer',text:'Aphids. Hose them off, then insecticidal soap every few days. Check the neighbours too.',votes:30,voted:false}]},
+      {id:'q2',q:'Will kale survive a frost?',by:'sam_seeds',votes:16,voted:false,answers:[
+        {by:'leo_grows',lvl:'Grower',text:'Yes, and it tastes sweeter afterwards. It handles a few degrees below zero without cover.',votes:19,voted:false}]},
+    ],
+    rosemary:[
+      {id:'q1',q:'How do I know when rosemary actually needs water?',by:'ana_s',votes:18,voted:false,answers:[
+        {by:'dana_o',lvl:'Master Farmer',text:'Push a finger 5 cm into the soil. Bone dry means water. An established plant in the ground can go two weeks.',votes:24,voted:false}]},
+      {id:'q2',q:'Can I prune back into the woody stems?',by:'jin_p',votes:7,voted:false,answers:[]},
+    ],
+    sunflower:[
+      {id:'q1',q:'The head is drooping. Is it dying or just heavy?',by:'li_wei',votes:14,voted:false,answers:[
+        {by:'priya_plants',lvl:'Grower',text:'If the back of the head is turning yellow, it is ripening and that is normal. If the leaves droop too, water it.',votes:17,voted:false}]},
+      {id:'q2',q:'When do I harvest the seeds?',by:'omar_h',votes:9,voted:false,answers:[]},
+    ],
+    pepper:[
+      {id:'q1',q:'Flowers keep dropping before any fruit sets.',by:'noor_a',votes:13,voted:false,answers:[
+        {by:'leo_grows',lvl:'Grower',text:'Usually heat or uneven watering. Shade cloth in the afternoon and steady moisture fix it most of the time.',votes:16,voted:false}]},
+    ],
+    fern:[
+      {id:'q1',q:'Brown crispy tips on every frond. What am I doing wrong?',by:'ana_s',votes:21,voted:false,answers:[
+        {by:'priya_plants',lvl:'Grower',text:'Dry air or dry soil. Mist it, move it away from heating vents and water before the soil dries out.',votes:25,voted:false}]},
+      {id:'q2',q:'How much light is too much?',by:'tom_k',votes:4,voted:false,answers:[]},
+    ],
+    succulent:[
+      {id:'q1',q:'Leaves are wrinkling. Too much water or too little?',by:'li_wei',votes:17,voted:false,answers:[
+        {by:'sam_seeds',lvl:'Sprout',text:'Wrinkled and firm means thirsty. Soft and see-through means overwatered.',votes:20,voted:false}]},
+    ],
+  },
+  posts:[
+    {id:'p1',tag:'Tip',title:'Water at the base, not the leaves',body:'Wet leaves are an open door for fungus. A slow pour at the soil line for 20 seconds beats a quick shower from above. If you only change one habit this season, make it this one.',by:'dana_o',lvl:'Master Farmer',votes:248,my:0,age:3,comments:[['priya_plants','Switched last year and my blight problems dropped by half.'],['tom_k','A cheap watering wand makes this much easier in raised beds.']]},
+    {id:'p2',tag:'Question',title:'Is it too late to plant garlic?',body:'I have a free corner in bed 4 and a bag of seed garlic. Ground is not frozen yet. Worth trying or should I wait for spring?',by:'sam_seeds',lvl:'Sprout',votes:57,my:0,age:5,comments:[['leo_grows','Go for it. As long as you can dig, you can plant. Mulch it heavily.'],['dana_o','Plant it 5 cm deep, pointy end up.']]},
+    {id:'p3',tag:'Show and tell',title:'Bed 3 at Riverside after six weeks',body:'Bob the rosemary has doubled in size and Herb finally stopped sulking. Thanks to everyone who kept the log updated. It made the handoffs painless.',by:'priya_plants',lvl:'Grower',votes:131,my:1,age:20,comments:[['maya_grows','Bob is thriving. No notes.']]},
+    {id:'p4',tag:'Advice',title:'A soap spray ratio for aphids that works',body:'Five millilitres of plain liquid soap in one litre of water. No degreaser, no bleach additives. Spray the undersides in the evening and rinse the next morning.',by:'leo_grows',lvl:'Grower',votes:96,my:0,age:26,comments:[['ruth_a','Tested on my kale this week. Two rounds and they were gone.']]},
+    {id:'p5',tag:'Tip',title:'Coffee grounds: what they do and what they do not',body:'They add organic matter and worms love them. They do not acidify soil in any amount that matters, and a thick layer forms a crust that sheds water. Mix them into compost instead.',by:'ruth_a',lvl:'Gardener',votes:74,my:0,age:50,comments:[]},
+  ],
+  leaders:[['Dana Okafor','dana_o',4310],['Priya Raman','priya_plants',2150],['Leo Martins','leo_grows',1705],['Tom Kowalski','tom_k',910],['Sam Idowu','sam_seeds',420]],
+  alerts:[
+    {id:'a1',x:118,y:196,sev:'high',title:'Aphids spreading on kale',where:'Riverside Community Garden',dist:'0.3 km',when:'2 h ago',by:'dana_o',body:'Clusters under the leaves in beds 2 and 3. Could use a hand spraying soap solution this evening.',helping:false,helpers:2},
+    {id:'a2',x:262,y:132,sev:'med',title:'Powdery mildew on squash',where:'Backyard on Maple Street',dist:'0.8 km',when:'5 h ago',by:'leo_grows',body:'White coating on the older leaves. Has anyone nearby beaten this without pulling the plant?',helping:false,helpers:1},
+    {id:'a3',x:58,y:96,sev:'high',title:'Japanese beetles sighted',where:"Northgate Seniors' Garden",dist:'1.4 km',when:'Yesterday',by:'ruth_a',body:'Found a dozen on the beans this morning. Check your roses and beans if you are within a few blocks.',helping:false,helpers:4},
+    {id:'a4',x:232,y:236,sev:'med',title:'Tomato leaves yellowing, need a second opinion',where:'Balcony on Mill Road',dist:'0.6 km',when:'Yesterday',by:'ana_s',body:'Lower leaves only. Scan says early blight at 61 percent. Would love someone to take a look.',helping:false,helpers:0},
+  ],
+  gpins:{g1:[150,222],g2:[292,92],g3:[88,62],g4:[334,188]},
+  rewards:[
+    {id:'r1',store:'Home Depot',title:'10% off the garden centre',cost:500,code:null},
+    {id:'r2',store:"Lowe's",title:'$5 off soil and mulch',cost:400,code:null},
+    {id:'r3',store:'Riverside Seed Library',title:'Free packet of heirloom seeds',cost:150,code:null},
+    {id:'r4',store:'Home Depot',title:'$15 off orders over $75',cost:1200,code:null},
+  ],
+  photos:[{id:1,label:'Bed 3, Sunday'},{id:2,label:'Bed 1, last week'}],
+};
+const SCENE = [{id:'sunny',x:72,y:332,s:1.7},{id:'tomas',x:196,y:332,s:1.7},{id:'u1',x:320,y:332,s:1.7},{id:'kaleb',x:74,y:462,s:1.9},{id:'bob',x:197,y:462,s:1.9},{id:'herb',x:318,y:462,s:1.9}];
+const WPOS = [[22,34],[50,30],[78,36],[24,72],[52,74],[79,70]];
+const MOODDOT = {thriving:'#4CC27F',okay:'#B9C7BC',thirsty:'#5AA9EE',wilting:'#F5C04A',sick:'#F0695E'};
+const DIM = {sunflower:[30,92],tomato:[32,64],pepper:[32,64],kale:[40,44],rosemary:[32,54],basil:[38,40],fern:[44,50],succulent:[30,28]};
+
+/* ---------- derived ---------- */
+const plant = id => S.plants.find(p => p.id === id);
+const garden = id => S.gardens.find(g => g.id === id);
+const cur = () => S.nav[S.tab][S.nav[S.tab].length - 1];
+function mood(p){
+  if (p.issue) return 'sick';
+  const over = p.last - p.every;
+  if (over >= 3) return 'wilting';
+  if (over >= 0) return 'thirsty';
+  if (p.last <= Math.max(2, p.every * .5)) return 'thriving';
+  return 'okay';
+}
+const issueOf = p => p.issue || (['thirsty','wilting'].includes(mood(p)) ? 'dry' : null);
+function guilt(p){
+  switch (mood(p)){
+    case 'thriving': return 'Look at these leaves. This is what being loved looks like.';
+    case 'okay': return 'I am fine. Not great, not terrible. You could visit more.';
+    case 'thirsty': return `${plural(p.last,'day')} since my last drink. Not that I am counting. I am counting.`;
+    case 'wilting': return `${plural(p.last,'day')} without water. I told the other plants you would come back. They laughed.`;
+    case 'sick': return `I have ${ISSUES[p.issue].name.toLowerCase()}. I did not want to worry you, so I suffered quietly.`;
+  }
+}
+function waterText(p){
+  const due = p.every - p.last;
+  return due > 0 ? `Next water in ${plural(due,'day')}` : due === 0 ? 'Water due today' : `${plural(-due,'day')} overdue`;
+}
+const whereText = p => p.where === 'home' ? 'Lives at home' : `${garden(p.where).name}${p.bed ? ' · ' + p.bed : ''}`;
+function level(xp){
+  let i = 0; LEVELS.forEach((l, k) => { if (xp >= l[1]) i = k; });
+  const next = LEVELS[i + 1];
+  return {i, name:LEVELS[i][0], next, pct: next ? Math.round((xp - LEVELS[i][1]) / (next[1] - LEVELS[i][1]) * 100) : 100};
+}
+const initials = n => n.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+const pill = md => `<span class="pill ${md}">${MOOD[md].label}</span>`;
+
+/* ---------- plant drawing ---------- */
+const leafPath = (len, w) => `M0 0C${-w} ${-len*.25} ${-w} ${-len*.8} 0 ${-len}C${w} ${-len*.8} ${w} ${-len*.25} 0 0Z`;
+function leaves(angles, len, w, fill, droop, ox = 0, oy = 0){
+  return angles.map(a => {
+    const d = a === 0 ? (droop - 1) * 40 : Math.max(-128, Math.min(128, a * droop));
+    return `<path d="${leafPath(len, w)}" fill="${fill}" transform="translate(${ox} ${oy}) rotate(${d.toFixed(1)})"/>`;
+  }).join('');
+}
+function foliage(kind, md){
+  const m = MOOD[md], dr = m.droop, g = c => mix(c, '#B7A441', m.tint);
+  let s = '';
+  if (kind === 'basil') s = leaves([-66,-33,0,33,66],34,12,g('#3FA34D'),dr) + leaves([-48,-16,16,48],24,9,g('#6CC264'),dr);
+  else if (kind === 'kale') s = leaves([-72,-44,-15,15,44,72],38,14,g('#2F7D5B'),dr) + leaves([-58,-29,0,29,58],26,9,g('#58A27C'),dr);
+  else if (kind === 'succulent') s = leaves([-84,-63,-42,-21,0,21,42,63,84],24,7,g('#5FAE8E'),1 + (dr - 1) * .3) + leaves([-50,-25,0,25,50],15,5,g('#8CCBAE'),1);
+  else if (kind === 'fern') s = leaves([-78,-52,-26,0,26,52,78],46,5.5,g('#3C9A52'),dr) + leaves([-65,-39,-13,13,39,65],34,4,g('#66B870'),dr);
+  else if (kind === 'rosemary') s = leaves([-44,-22,0,22,44],50,4.2,g('#4C8B6B'),dr) + leaves([-33,-11,11,33],40,3.4,g('#7FB59A'),dr) + (md === 'thriving' ? '<circle cx="-9" cy="-37" r="2.6" fill="#A99BE0"/><circle cx="7" cy="-39" r="2.6" fill="#A99BE0"/><circle cx="18" cy="-30" r="2.4" fill="#A99BE0"/>' : '');
+  else if (kind === 'tomato' || kind === 'pepper'){
+    const stem = g('#3E8E41');
+    s = `<g transform="rotate(${((dr - 1) * 12).toFixed(1)})"><path d="M0 0C-2 -18 3 -34 0 -50" stroke="${stem}" stroke-width="3.6" fill="none" stroke-linecap="round"/>`
+      + leaves([-62,62],26,9,g('#3F9B48'),dr,0,-16) + leaves([-48,48],24,8,g('#55AD55'),dr,0,-32) + leaves([-18,18],20,7,g('#6BBB63'),dr,0,-48)
+      + (kind === 'tomato'
+        ? '<circle cx="-13" cy="-9" r="6.5" fill="#E5483B"/><circle cx="12" cy="-23" r="6" fill="#E5483B"/><circle cx="-9" cy="-37" r="5" fill="#EF7B45"/>'
+        : '<ellipse cx="-12" cy="-7" rx="5" ry="9" fill="#E9A21B"/><ellipse cx="12" cy="-20" rx="4.6" ry="8.5" fill="#D9463B"/>')
+      + '</g>';
+  }
+  else if (kind === 'sunflower'){
+    const petal = g('#F4B91F');
+    let petals = ''; for (let i = 0; i < 12; i++) petals += `<ellipse rx="4.2" ry="11" cy="-14" fill="${petal}" transform="rotate(${i * 30})"/>`;
+    s = `<path d="M0 0C-2 -20 2 -40 0 -62" stroke="${g('#3E8E41')}" stroke-width="4" fill="none" stroke-linecap="round"/>`
+      + leaves([-64,64],24,9,g('#3F9B48'),dr,0,-22)
+      + `<g transform="rotate(${((dr - 1) * 48).toFixed(1)} 0 -44)"><g transform="translate(0 -64)">${petals}<circle r="9.5" fill="#6B4423"/><circle r="5" fill="#553419"/></g></g>`;
+  }
+  if (md === 'sick') s += '<circle cx="-9" cy="-20" r="2.6" fill="#7A5A2B"/><circle cx="8" cy="-28" r="2.2" fill="#7A5A2B"/><circle cx="3" cy="-12" r="2" fill="#7A5A2B"/><circle cx="-4" cy="-33" r="1.8" fill="#7A5A2B"/>';
+  return s;
+}
+function face(md){
+  const k = '#3A2218', st = `stroke="${k}" stroke-width="2.4" stroke-linecap="round" fill="none"`;
+  const dots = `<circle cx="49" cy="105" r="2.7" fill="${k}"/><circle cx="71" cy="105" r="2.7" fill="${k}"/>`;
+  switch (md){
+    case 'thriving': return `<path d="M45 106q4 -5 8 0M67 106q4 -5 8 0" ${st}/><path d="M52 112h16a8 8 0 0 1-16 0z" fill="${k}"/><circle cx="41" cy="113" r="3.4" fill="#fff" opacity=".4"/><circle cx="79" cy="113" r="3.4" fill="#fff" opacity=".4"/>`;
+    case 'okay': return dots + `<path d="M54 114q6 5 12 0" ${st}/>`;
+    case 'thirsty': return dots + `<path d="M44 98l8 2.5M76 98l-8 2.5" ${st}/><path d="M54 118q6 -5 12 0" ${st}/><path d="M85 95c3 4 4.2 6 4.2 8a4.2 4.2 0 0 1-8.4 0c0-2 1.2-4 4.2-8z" fill="#7CC0F5"/>`;
+    case 'wilting': return `<path d="M45 103q4 4 8 0M67 103q4 4 8 0" ${st}/><path d="M52 120q8 -8 16 0" ${st}/><path d="M46 108c2.4 3.4 3.4 5 3.4 6.8a3.4 3.4 0 0 1-6.8 0c0-1.8 1-3.4 3.4-6.8z" fill="#7CC0F5"/>`;
+    case 'sick': return `<path d="M45 105h8M67 105h8" ${st}/><path d="M51 117q3 -4 6 0t6 0t6 0" ${st}/><rect x="73" y="92" width="14" height="6" rx="3" fill="#F3E3C7" transform="rotate(-18 80 95)"/>`;
+  }
+}
+function plantSVG(p, size = 96, md = mood(p)){
+  const pot = POTS[p.pot % POTS.length];
+  const vt = VTOP[p.kind];
+  return `<svg class="plant" width="${size}" height="${Math.round(size * (140 - vt) / 120)}" viewBox="0 ${vt} 120 ${140 - vt}" aria-hidden="true"><g class="sway"><g transform="translate(60 82)">${foliage(p.kind, md)}</g></g><path d="M30 86h60l-7 42a6 6 0 0 1-6 5H43a6 6 0 0 1-6-5z" fill="${pot}"/><rect x="25" y="78" width="70" height="13" rx="5" fill="${mix(pot,'#000000',.14)}"/>${face(md)}</svg>`;
+}
+
+/* ---------- camera scene ---------- */
+function corners(x0, y0, x1, y1, l = 14){
+  return `M${x0} ${y0+l}V${y0}H${x0+l}M${x1-l} ${y0}H${x1}V${y0+l}M${x1} ${y1-l}V${y1}H${x1-l}M${x0+l} ${y1}H${x0}V${y1-l}`;
+}
+function sceneSVG({overlay = true, sel = null, busy = null, found = 99, tap = true, generic = false} = {}){
+  let planks = ''; for (let x = 0; x < 390; x += 39) planks += `<rect x="${x + 1}" y="118" width="37" height="182" rx="3" fill="${x % 78 ? '#C7A476' : '#BE9A6B'}"/>`;
+  let rows = ''; for (let y = 372; y < 700; y += 68) rows += `<rect x="0" y="${y}" width="390" height="22" fill="#5E3F2B" opacity=".55"/>`;
+  let pl = '', ov = '';
+  SCENE.forEach((sp, i) => {
+    const p = plant(sp.id), md = generic ? 'okay' : mood(p);
+    pl += `<ellipse cx="${sp.x}" cy="${sp.y + 3}" rx="${30 * sp.s}" ry="${7 * sp.s}" fill="#4A3020"/><g transform="translate(${sp.x} ${sp.y}) scale(${sp.s})">${foliage(p.kind, md)}</g>`;
+    if (!overlay || i >= found) return;
+    const [w, h] = DIM[p.kind], hw = Math.min(w * sp.s, 58), x0 = sp.x - hw, x1 = sp.x + hw, y0 = sp.y - h * sp.s - 6, y1 = sp.y + 10;
+    const on = sel === sp.id, col = on ? '#F2B01E' : '#FFFFFF';
+    const label = generic ? CARE[p.kind].species : p.unnamed ? CARE[p.kind].species + '?' : p.name, lw = label.length * 7.4 + 30;
+    const dot = MOODDOT[md];
+    ov += `<g class="ret"><path d="${corners(x0, y0, x1, y1)}" stroke="${col}" stroke-width="${on ? 3.5 : 2.5}" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>`
+      + `<rect x="${sp.x - lw / 2}" y="${y0 - 30}" width="${lw}" height="24" rx="12" fill="${on ? '#F2B01E' : 'rgba(0,0,0,.62)'}"/><circle cx="${sp.x - lw / 2 + 13}" cy="${y0 - 18}" r="4" fill="${dot}"/><text x="${sp.x - lw / 2 + 22}" y="${y0 - 13.5}" fill="${on ? '#2B1C00' : '#fff'}">${esc(label)}</text>`;
+    if (busy === sp.id) ov += `<rect x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" fill="#4CC27F" opacity=".14"/><rect class="scanline" style="--h:${(y1 - y0 - 4).toFixed(0)}px" x="${x0}" y="${y0}" width="${x1 - x0}" height="4" rx="2" fill="#7CF2AE"/>`;
+    if (tap) ov += `<rect x="${x0}" y="${y0 - 30}" width="${x1 - x0}" height="${y1 - y0 + 30}" fill="transparent" data-a="scanTap:${sp.id}" role="button" tabindex="0" aria-label="${esc(label)}"/>`;
+  });
+  const delay = -((performance.now() / 1000) % 14).toFixed(2);
+  return `<svg class="scene" viewBox="0 0 390 700" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Simulated camera view of a raised garden bed with six plants"><g class="world" style="animation-delay:${delay}s">
+    <rect x="-10" y="-10" width="410" height="250" fill="#9FD0EE"/><rect x="-10" y="60" width="410" height="80" fill="#C5E3F2"/>
+    <circle cx="40" cy="120" r="48" fill="#4F8A4A"/><circle cx="130" cy="108" r="60" fill="#5C9A52"/><circle cx="250" cy="118" r="54" fill="#4F8A4A"/><circle cx="350" cy="104" r="62" fill="#5C9A52"/>
+    ${planks}<rect x="-10" y="150" width="410" height="9" fill="#A98557"/><rect x="-10" y="250" width="410" height="9" fill="#A98557"/>
+    <rect x="-10" y="292" width="410" height="14" fill="#6FAE55"/>
+    <rect x="-10" y="304" width="410" height="410" fill="#6B4A33"/>${rows}
+    <rect x="-10" y="300" width="410" height="12" fill="#A67C52"/><rect x="-10" y="560" width="410" height="16" fill="#8E6842"/>
+    ${pl}${ov}</g></svg>`;
+}
+
+/* ---------- live camera ---------- */
+const video = document.createElement('video');
+video.muted = true; video.autoplay = true; video.setAttribute('playsinline', ''); video.setAttribute('aria-label', 'Live camera view');
+let stream = null, starting = false;
+const camPref = v => { try { if (v === undefined) return localStorage.getItem('os-cam') === 'live'; localStorage.setItem('os-cam', v ? 'live' : 'sample'); } catch (e) {} return false; };
+function stopLive(){ if (stream){ stream.getTracks().forEach(t => t.stop()); stream = null; video.srcObject = null; } }
+async function startLive(){
+  starting = true;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}, audio:false});
+    video.srcObject = stream; starting = false;
+    if (!document.querySelector('[data-media]')) return stopLive();
+    video.play().catch(() => {}); recKick();
+  } catch (e) {
+    starting = false; stream = null; S.cam.src = 'sample'; S.cam.blocked = true; S.cam.marks = []; camPref(false);
+    if (S.sheet?.type === 'setup'){ toast('Live camera is blocked on this page. Using the sample garden.'); renderSheet(); }
+    else { render(); if (S.tab === 'scan') openSheet('camsrc'); }
+  }
+}
+function syncCamera(){
+  const slot = document.querySelector('#sheet-root [data-media]') || document.querySelector('#screen [data-media]');
+  if (!slot) return stopLive();
+  if (video.parentNode !== slot) slot.appendChild(video);
+  if (stream) video.play().catch(() => {}); else if (!starting) startLive();
+  if (S.tab === 'scan' && S.cam.src === 'live'){ if (S.rec.status === 'off' && S.rec.url) recLoad(S.rec.url).then(recKick); else recKick(); }
+}
+/* ---------- live recognition ---------- */
+let recModel = null, recLoop = false;
+const recCanvas = document.createElement('canvas'); recCanvas.width = recCanvas.height = 224;
+const recPool = () => S.plants.filter(p => !p.unnamed && (p.mine || p.where === 'g1'));
+const recSave = () => { try { localStorage.setItem('os-rec', JSON.stringify({url:S.rec.url, map:S.rec.map})); } catch (e) {} };
+const addScript = src => new Promise((ok, no) => { const el = document.createElement('script'); el.src = src; el.onload = ok; el.onerror = () => { el.remove(); no(); }; document.head.appendChild(el); });
+async function recLibs(){
+  for (const [name, urls] of REC_LIBS){
+    if (window[name]) continue;
+    let ok = false;
+    for (const u of urls){ try { await addScript(u); ok = true; break; } catch (e) {} }
+    if (!ok) throw new Error('Could not load the recognition library. It needs an internet connection and does not load inside the Claude viewer.');
+  }
+}
+async function recLoad(url){
+  url = url.trim().replace(/(model|metadata)\.json$/, ''); if (!url) return;
+  if (!url.endsWith('/')) url += '/';
+  const R = S.rec; R.url = url; R.status = 'loading'; R.err = ''; recModel = null;
+  if (S.sheet?.type === 'camsrc') renderSheet();
+  try {
+    await recLibs();
+    recModel = await window.tmImage.load(url + 'model.json', url + 'metadata.json');
+    R.labels = recModel.getClassLabels();
+    R.labels.forEach(l => { if (!(l in R.map)){ const m = recPool().find(p => p.name.toLowerCase() === String(l).toLowerCase()); R.map[l] = m ? m.id : ''; } });
+    R.status = 'ready'; recSave();
+  } catch (e) { R.status = 'error'; R.err = String(e?.message || e).slice(0, 180); recModel = null; }
+  if (S.sheet?.type === 'camsrc') renderSheet(); else if (S.tab === 'scan' && !S.sheet) render();
+}
+function recReset(){ const R = S.rec; if (R.locked){ S.cam.marks = []; S.scan.sel = null; } R.locked = R.cand = R.dismissed = null; R.streak = R.misses = 0; }
+function recKick(){ if (!recLoop && S.rec.status === 'ready'){ recLoop = true; setTimeout(recTick, 100); } }
+async function recTick(){
+  if (!(S.rec.status === 'ready' && recModel && stream && S.tab === 'scan' && !cur() && S.cam.src === 'live')){ recLoop = false; recReset(); return; }
+  if (!S.sheet && !S.scan.busy && S.scan.mode !== 'photo' && video.videoWidth){
+    const side = Math.min(video.videoWidth, video.videoHeight);
+    try {
+      recCanvas.getContext('2d').drawImage(video, (video.videoWidth - side) / 2, (video.videoHeight - side) / 2, side, side, 0, 0, 224, 224);
+      recUpdate(await recModel.predict(recCanvas));
+    } catch (e) {}
+  }
+  setTimeout(recTick, REC_EVERY);
+}
+function recUpdate(preds){
+  const R = S.rec, best = preds.reduce((a, b) => b.probability > a.probability ? b : a), id = R.map[best.className];
+  const hit = id && plant(id) && best.probability >= REC_MIN ? id : null;
+  if (hit && hit === R.cand) R.streak++; else { R.cand = hit; R.streak = hit ? 1 : 0; }
+  R.misses = hit === R.locked && hit ? 0 : R.misses + 1;
+  if (hit && R.streak >= REC_STREAK && R.locked !== hit){
+    R.locked = hit; R.misses = 0; R.dismissed = null; S.cam.marks = [{x:50, y:54, id:hit, conf:best.probability}];
+    S.scan.sel = S.scan.mode === 'identify' ? hit : null; render();
+  } else if (R.locked && R.misses >= REC_MISSES){
+    recReset(); S.cam.marks = []; S.scan.sel = null; render();
+  } else if (R.locked && hit === R.locked){
+    const el = document.querySelector('.mk-conf'); if (el) el.textContent = Math.round(best.probability * 100) + '%';
+  }
+}
+(() => { try { const v = JSON.parse(localStorage.getItem('os-rec') || 'null'); if (v?.url){ S.rec.url = v.url; S.rec.map = v.map || {}; } } catch (e) {} })();
+
+function enterScan(){ if (!S.cam.tried && S.cam.src === 'sample' && camPref()){ S.cam.src = 'live'; } S.cam.tried = true; }
+const BRACKET = `<svg viewBox="0 0 150 170" preserveAspectRatio="none" aria-hidden="true"><path d="${corners(2, 2, 148, 168, 24)}" stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>`;
+function liveMarks(){
+  const sc = S.scan;
+  return `<div class="marks"><button class="cam-tap" data-a="liveTap" aria-label="Tap a plant in the camera view"></button>${S.cam.marks.map(m => {
+    const p = plant(m.id), busy = sc.busy === m.id;
+    const label = m.pending ? 'Identifying…' : p.unnamed ? CARE[p.kind].species + '?' : p.name;
+    return `<div class="mark ${sc.sel === m.id ? 'on' : ''} ${busy ? 'busy' : ''}" style="left:${m.x.toFixed(1)}%;top:${m.y.toFixed(1)}%">${BRACKET}${busy ? '<span class="mk-scan"></span>' : ''}<button class="mk-label" data-a="scanTap:${m.id}">${m.pending ? '' : `<i style="background:${MOODDOT[mood(p)]}"></i>`}${esc(label)}${m.conf ? ` <span class="mk-conf">${Math.round(m.conf * 100)}%</span>` : ''}</button></div>`;
+  }).join('')}</div>`;
+}
+const thumbHTML = ph => ph?.url ? `<img src="${ph.url}" alt="">` : sceneSVG({overlay:false, tap:false});
+
+/* ---------- views ---------- */
+function vBuddies(){
+  const rank = {wilting:4,sick:3,thirsty:2,okay:1,thriving:0};
+  const mine = S.plants.filter(p => p.mine && !p.unnamed).sort((a, b) => rank[mood(b)] - rank[mood(a)]);
+  const hero = mine[0], hm = mood(hero), need = mine.filter(p => rank[mood(p)] >= 2).length, iss = issueOf(hero);
+  const act = iss === 'dry' ? `<button class="btn water sm" data-a="water:${hero.id}">${I.drop}Water now</button>`
+    : iss ? `<button class="btn sm" data-a="diagnose:${hero.id}">${I.scanIc}Diagnose</button>` : '';
+  return `<header class="lt"><div><p class="eyebrow">${todayStr}</p><h1>My buddies</h1></div><button class="iconbtn" data-a="tab:scan" aria-label="Add a plant by scanning it">${I.plus}</button></header>
+  <section class="hero ${hm}">
+    <div>${plantSVG(hero, 128)}</div>
+    <div><h2>${esc(hero.name)}</h2>${pill(hm)}
+      <p class="bubble">${esc(guilt(hero))}</p>
+      <div class="btnrow">${act}<button class="btn ghost sm" data-a="push:plant:${hero.id}">Open</button></div></div>
+  </section>
+  <div class="sumrow"><span class="pill ${need ? 'sick' : 'thriving'} plain">${need === 1 ? '1 buddy needs you' : need ? need + ' buddies need you' : 'Everyone is happy'}</span><span class="pill okay plain">${mine.length - need} doing fine</span></div>
+  <div class="grid2">${mine.slice(1).map(p => `<button class="bcard" data-a="push:plant:${p.id}">${plantSVG(p, 92)}<span class="n">${esc(p.name)}</span><span class="sub">${CARE[p.kind].species} · ${p.where === 'home' ? 'Home' : 'Riverside'}</span>${pill(mood(p))}</button>`).join('')}
+    <button class="bcard" data-a="tab:scan" style="justify-content:center;align-items:center;border-style:dashed;min-height:150px"><span class="iconbtn">${I.plus}</span><span class="n">Add a buddy</span><span class="sub">Scan a plant to name it</span></button>
+  </div>`;
+}
+
+function navBar(title, right = ''){
+  return `<header class="nav"><button class="back" data-a="back">${I.back}Back</button><div class="nav-title">${esc(title)}</div><div class="nav-right">${right}</div></header>`;
+}
+
+function vPlant(id){
+  const p = plant(id), md = mood(p), c = CARE[p.kind], seg = S.seg.plant, iss = issueOf(p);
+  const wf = Math.max(4, Math.min(100, 100 - p.last / p.every * 100));
+  const care = () => {
+    const logs = S.log.filter(l => l.plant === p.id).slice(0, 3);
+    return `<div class="sec" style="margin-top:14px"><div class="btnrow">
+        <button class="btn water" data-a="water:${p.id}">${I.drop}Water</button>
+        <button class="btn soft" data-a="feed:${p.id}">${I.feed}Feed</button>
+        <button class="btn ghost" data-a="diagnose:${p.id}">${I.scanIc}Diagnose</button></div></div>
+      <div class="sec"><h2>Status <small>${MOOD[md].health}% health</small></h2><div class="list">
+        <div class="meter"><span class="ic" style="background:var(--water-soft);color:var(--water-ink)">${I.drop}</span><div class="top"><span>Water</span><span>Watered ${whenText(p.last)} · ${waterText(p)}</span></div><div class="bar"><i style="width:${wf}%;background:var(--water)"></i></div></div>
+        <div class="meter"><span class="ic" style="background:var(--sun-soft);color:var(--sun-ink)">${I.sun}</span><div class="top"><span>Sunlight</span><span>${esc(p.sun)} · ${c.hours}</span></div><div class="bar"><i style="width:${p.sun === 'Full sun' ? 90 : p.sun === 'Part shade' ? 60 : 30}%;background:var(--sun)"></i></div></div>
+        <div class="meter"><span class="ic" style="background:var(--leaf-soft);color:var(--leaf-ink)">${I.feed}</span><div class="top"><span>Soil and feed</span><span>${esc(p.soil)}</span></div><div class="sub" style="grid-column:2">${esc(p.fert)} · last fed ${whenText(p.fed)}</div></div>
+        ${iss ? `<button class="row" data-a="diagnose:${p.id}"><span class="pill sick plain">${ISSUES[iss].name}</span><span class="grow sub">Tap to see how to fix it</span>${I.chev}</button>` : ''}
+      </div>${p.note ? `<p class="banner" style="margin-top:10px">Supervisor note: ${esc(p.note)}</p>` : ''}</div>
+      <div class="sec"><h2>How to look after ${esc(p.name)}</h2><div class="list">${c.steps.map((s, i) => {
+        const done = S.checks[p.id + i];
+        return `<button class="step ${done ? 'done' : ''}" data-a="check:${p.id}:${i}" aria-pressed="${!!done}"><span class="num">${done ? I.check : i + 1}</span><span><span class="t">${s[0]}</span><br><span class="sub">${s[1]}</span></span></button>`;
+      }).join('')}</div></div>
+      <div class="sec"><h2>Recent care</h2><div class="list">${logs.length ? logs.map(logRow).join('') : '<div class="row sub">Nothing logged yet.</div>'}</div></div>`;
+  };
+  const forum = () => {
+    const qs = S.forum[p.kind] || [], f = S.forumQ.toLowerCase();
+    return `<div class="sec" style="margin-top:14px"><div class="stack">
+      <div class="search">${I.search}<input id="forum-q" type="search" placeholder="Search ${c.species.toLowerCase()} questions" value="${esc(S.forumQ)}" data-filter="qlist" aria-label="Search questions"></div>
+      <div class="list" id="qlist">${qs.map(q => `<button class="qrow" data-text="${esc(q.q.toLowerCase())}" data-a="push:q:${p.kind}:${q.id}" ${f && !q.q.toLowerCase().includes(f) ? 'hidden' : ''}><span class="votebox">${I.up}${q.votes}</span><span><span class="t" style="font-weight:600">${esc(q.q)}</span><br><span class="sub">${q.answers.length ? plural(q.answers.length, 'answer') : 'No answers yet · earn 15 pts'} · @${q.by}</span></span></button>`).join('')}</div>
+      <p class="sub" id="qlist-empty" hidden>No questions match that search. Ask it yourself.</p>
+      <button class="btn ghost block" data-a="sheet:ask:${p.kind}">${I.plus}Ask the ${c.species.toLowerCase()} forum</button>
+      <p class="sub">Answer a question to earn 15 points, plus 5 for every upvote your answer gets.</p></div></div>`;
+  };
+  return navBar(c.species) + `<div class="phead">
+      ${plantSVG(p, 150)}
+      <p class="bubble down">${esc(guilt(p))}</p>
+      <h1>${esc(p.name)}<button class="edit" data-a="sheet:rename:${p.id}" aria-label="Rename ${esc(p.name)}">${I.pencil}</button></h1>
+      <div>${pill(md)}</div><p class="sub">${c.latin} · ${esc(whereText(p))}</p></div>
+    <div class="pad" style="margin-top:12px"><div class="seg" role="tablist"><button class="${seg === 'care' ? 'on' : ''}" data-a="seg:plant:care">Care</button><button class="${seg === 'forum' ? 'on' : ''}" data-a="seg:plant:forum">Forum</button></div></div>
+    ${seg === 'care' ? care() : forum()}`;
+}
+
+function vQuestion(t){
+  const q = S.forum[t.id].find(x => x.id === t.x), ans = [...q.answers].sort((a, b) => b.votes - a.votes);
+  return navBar(CARE[t.id].species + ' forum') + `<div class="sec" style="margin-top:14px"><div class="card" style="display:flex;gap:12px">
+      <button class="votebox ${q.voted ? 'on' : ''}" data-a="voteQ:${t.id}:${q.id}" aria-label="Upvote question" aria-pressed="${q.voted}">${I.up}${q.votes}</button>
+      <div><h2 style="font-size:20px;line-height:1.2">${esc(q.q)}</h2><p class="sub" style="margin-top:4px">Asked by @${q.by}</p></div></div></div>
+    <div class="sec"><h2>${plural(ans.length, 'answer')}</h2>
+      ${ans.length ? `<div class="list">${ans.map(a => `<div class="answer ${a.mine ? 'mine' : ''}">
+        <button class="votebox ${a.voted ? 'on' : ''}" data-a="voteA:${t.id}:${q.id}:${q.answers.indexOf(a)}" aria-label="Upvote answer" aria-pressed="${a.voted}" ${a.mine ? 'disabled' : ''}>${I.up}${a.votes}</button>
+        <div><p class="meta"><b style="color:var(--ink)">@${a.by}</b><span class="lvl">${a.lvl}</span>${a.mine ? '<span class="lvl">You</span>' : ''}</p><p style="margin-top:4px">${esc(a.text)}</p></div></div>`).join('')}</div>`
+      : '<p class="sub">No one has answered yet. Be the first.</p>'}
+    </div>
+    <div class="sec"><h2>Your answer</h2><form class="form" data-f="answer:${t.id}:${q.id}">
+      <textarea id="answer-text" name="text" placeholder="Share what worked for you" required aria-label="Your answer"></textarea>
+      <button class="btn block" type="submit">Post answer<span class="pts" style="margin-left:6px">+15</span></button></form></div>`;
+}
+
+function vScan(){
+  const sc = S.scan, cm = S.cam, real = cm.src !== 'sample', p = sc.sel && plant(sc.sel);
+  const recOn = cm.src === 'live' && S.rec.status === 'ready', lk = recOn && S.rec.locked && plant(S.rec.locked);
+  const hint = sc.busy ? 'Scanning leaves…' : recOn && sc.mode !== 'photo' ? (lk ? (sc.mode === 'diagnose' ? `Tap to check ${lk.name} for pests and disease` : `Recognised ${lk.name}`) : 'Looking for your plants…') : real && sc.mode === 'identify' ? 'Point at a plant and tap it' : real && sc.mode === 'diagnose' ? 'Tap a plant to check it for pests and disease' : sc.mode === 'identify' ? 'Tap a plant to see what it is and how it is doing' : sc.mode === 'diagnose' ? 'Tap a plant to check it for pests and disease' : 'Press the shutter to save a photo to the garden album';
+  let pop = '';
+  if (p && sc.mode === 'identify'){
+    const c = CARE[p.kind], md = mood(p);
+    pop = `<div class="cam-pop" role="dialog" aria-label="Plant details"><button class="x" data-a="scanClose" aria-label="Close">${I.x}</button>
+      ${plantSVG(p, 64)}
+      <div><h3>${p.unnamed ? c.species : esc(p.name)}</h3><p class="sub">${p.unnamed ? `${c.latin} · 91% match` : `${c.species} · ${c.latin}`}</p>
+        <div class="facts">${pill(md)}<span class="fact">${waterText(p)}</span><span class="fact">${esc(p.sun)}</span><span class="fact">${MOOD[md].health}% health</span></div>
+        <div class="btnrow">${p.unnamed ? `<button class="btn sm" data-a="sheet:name:${p.id}">Name this plant<span class="pts">+20</span></button>`
+          : `<button class="btn sm" data-a="openPlant:${p.id}">Open buddy</button><button class="btn ghost sm" data-a="scanDx:${p.id}">Diagnose</button>`}</div></div></div>`;
+  }
+  return `<div class="cam">
+    ${real ? `<div class="media" ${cm.src === 'live' ? 'data-media' : ''}>${cm.src === 'photo' ? `<img src="${cm.photo}" alt="Your photo">` : ''}</div>${sc.mode !== 'photo' ? liveMarks() : ''}` : sceneSVG({overlay: sc.mode !== 'photo', sel: sc.sel, busy: sc.busy})}
+    <div class="cam-top"><button class="cam-chip" data-a="sheet:camsrc" aria-label="Change camera source"><i class="${cm.src === 'live' ? 'rec' : ''}"></i>${{sample:'Sample garden', live:'Live camera', photo:'Your photo'}[cm.src]}${I.down}</button><button class="cam-roll" data-a="sheet:photos" aria-label="Open photos"><span class="thumb">${thumbHTML(S.photos[0])}</span>${S.photos.length}</button></div>
+    ${pop}
+    <div class="cam-bottom"><p class="cam-hint">${hint}</p>
+      <div class="seg">${[['identify','Identify'],['diagnose','Diagnose'],['photo','Photo']].map(m => `<button class="${sc.mode === m[0] ? 'on' : ''}" data-a="scanMode:${m[0]}">${m[1]}</button>`).join('')}</div>
+      <button class="shutter" data-a="snap" aria-label="Take a photo"></button></div>
+    <div class="flash" id="flash"></div></div>`;
+}
+
+function logRow(l){
+  const p = l.plant && plant(l.plant), water = l.action === 'Watered';
+  const latest = water && p && S.log.find(x => x.plant === l.plant && x.action === 'Watered') === l;
+  const head = p ? `<b>${esc(p.name)}</b> ${water ? 'got watered' : 'was ' + l.action.charAt(0).toLowerCase() + l.action.slice(1)}` : `<b>${esc(l.action)}</b>`;
+  return `<div class="logrow"><span class="ic ${water ? 'w' : ''}">${water ? I.drop : I.tool}</span><div><p>${head} ${whenText(l.days)} <span class="sub">by ${esc(l.who === 'You' ? 'you' : l.who)}</span></p>
+    ${latest ? `<p class="next">${p.every - p.last > 0 ? `Does not need water for ${plural(p.every - p.last, 'day')}` : 'Needs water again now'}</p>` : ''}${l.note ? `<p class="sub">${esc(l.note)}</p>` : ''}</div></div>`;
+}
+function gardenTasks(g){
+  const t = [];
+  S.plants.filter(p => p.where === g.id && !p.unnamed).forEach(p => {
+    const md = mood(p);
+    if (md === 'thirsty' || md === 'wilting') t.push({kind:'water', p, text:`Water ${p.name}`, sub:`${waterText(p)} · ${p.bed}`});
+    if (p.issue) t.push({kind:'treat', p, text:`Treat ${p.name} for ${ISSUES[p.issue].name.toLowerCase()}`, sub:`Found by scan · ${p.bed}`});
+  });
+  g.tasks.forEach(m => t.push({kind:'manual', m, text:m.text, sub:m.sub}));
+  return t;
+}
+
+function vGardens(){
+  const seg = S.seg.gardens;
+  let body = '';
+  if (seg === 'mine'){
+    const mine = S.gardens.filter(g => g.role);
+    body = `<div class="pad stack">${mine.map(g => {
+      const ps = S.plants.filter(p => p.where === g.id && !p.unnamed), n = gardenTasks(g).length, last = S.log.find(l => l.g === g.id);
+      return `<button class="gcard" data-a="push:garden:${g.id}"><div class="gtop"><h3>${esc(g.name)}</h3><span class="pill ${g.role === 'supervisor' ? 'wilting' : 'thriving'} plain">${g.role === 'supervisor' ? 'Supervisor' : 'Volunteer'}</span></div>
+        <div class="mini">${ps.slice(0, 6).map(p => plantSVG(p, 44)).join('')}</div>
+        <p style="font-weight:600;margin-top:6px">${n ? plural(n, 'job') + ' need doing' : 'All caught up'}</p>
+        ${last ? `<p class="sub">Last: ${last.plant ? esc(plant(last.plant).name) + ' ' + last.action.toLowerCase() : esc(last.action)} ${whenText(last.days)} by ${esc(last.who === 'You' ? 'you' : last.who)}</p>` : '<p class="sub">No activity logged yet</p>'}</button>`;
+    }).join('')}
+    <button class="btn ghost block" data-a="setup">${I.scanIc}Set up a new garden with an AR scan</button>
+    <p class="sub">Supervisors scan the beds once. Volunteers get the care schedule and a shared log.</p></div>`;
+  } else if (seg === 'explore'){
+    body = `<div class="pad stack">${S.gardens.map(g => {
+      const ps = S.plants.filter(p => p.where === g.id && !p.unnamed);
+      return `<div class="gcard"><div class="gtop"><h3>${esc(g.name)}</h3><span class="sub" style="white-space:nowrap">${g.dist}</span></div>
+        <p class="sub" style="margin-top:4px">${esc(g.about)}</p><div class="mini">${ps.slice(0, 6).map(p => plantSVG(p, 44)).join('')}</div>
+        <p class="sub" style="margin:6px 0 10px">${plural(ps.length, 'plant')} · ${plural(g.people.length, 'member')} · run by ${esc(g.sup)}</p>
+        <div class="btnrow"><button class="btn ghost sm" data-a="push:garden:${g.id}">Look around</button>${g.role ? '<button class="btn soft sm" disabled>Joined</button>' : `<button class="btn sm" data-a="join:${g.id}">Join garden</button>`}</div></div>`;
+    }).join('')}</div>`;
+  } else body = vMap();
+  return `<header class="lt"><div><p class="eyebrow">Community gardens</p><h1>Gardens</h1></div></header>
+    <div class="pad" style="margin-bottom:14px"><div class="seg">${[['mine','My gardens'],['explore','Explore'],['map','Map']].map(m => `<button class="${seg === m[0] ? 'on' : ''}" data-a="seg:gardens:${m[0]}">${m[1]}</button>`).join('')}</div></div>${body}`;
+}
+
+function vMap(){
+  const f = S.seg.map, sel = S.mapSel;
+  const showA = f !== 'gardens', showG = f !== 'alerts';
+  let pins = '';
+  if (showG) S.gardens.forEach(g => { const [x, y] = S.gpins[g.id] || [200, 60], on = sel === g.id;
+    pins += `<g class="m-pin" data-a="mapSel:${g.id}" role="button" tabindex="0" aria-label="${esc(g.name)}"><circle cx="${x}" cy="${y}" r="${on ? 17 : 13}" fill="var(--leaf)" stroke="var(--surface)" stroke-width="3"/><path d="M${x} ${y + 6}v-7M${x} ${y - 1}c0-3 2-5 5-5 0 3-2 5-5 5zM${x} ${y + 1}c0-2-2-4-5-4 0 2 2 4 5 4z" stroke="var(--on-leaf)" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>`; });
+  if (showA) S.alerts.forEach(a => { const on = sel === a.id, col = a.sev === 'high' ? 'var(--alert)' : 'var(--sun)';
+    pins += `<g class="m-pin" data-a="mapSel:${a.id}" role="button" tabindex="0" aria-label="Alert: ${esc(a.title)}"><circle class="m-pulse" cx="${a.x}" cy="${a.y}" r="11" fill="${col}"/><circle cx="${a.x}" cy="${a.y}" r="${on ? 15 : 11}" fill="${col}" stroke="var(--surface)" stroke-width="3"/><path d="M${a.x} ${a.y - 5}v6" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><circle cx="${a.x}" cy="${a.y + 5}" r="1.6" fill="#fff"/></g>`; });
+  const selA = S.alerts.find(a => a.id === sel), selG = S.gardens.find(g => g.id === sel);
+  const aCard = a => `<div class="card acard ${a.sev === 'med' ? 'med' : ''}"><div class="gtop"><h3>${esc(a.title)}</h3><span class="sub" style="white-space:nowrap">${a.dist}</span></div>
+    <p class="sub">${esc(a.where)} · ${a.when} · @${a.by}</p><p style="margin:6px 0 10px">${esc(a.body)}</p>
+    <div class="btnrow"><button class="btn sm ${a.helping ? 'soft' : ''}" data-a="help:${a.id}">${a.helping ? I.check + 'You offered to help' : 'I can help<span class="pts">+20</span>'}</button><span class="sub" style="align-self:center">${plural(a.helpers, 'neighbour')} helping</span></div></div>`;
+  const list = selA ? aCard(selA) : selG ? `<div class="card"><div class="gtop"><h3 style="font-size:17px">${esc(selG.name)}</h3><span class="sub">${selG.dist}</span></div><p class="sub" style="margin:4px 0 10px">${esc(selG.about)}</p><button class="btn sm" data-a="push:garden:${selG.id}">Open garden</button></div>` : '';
+  return `<div class="pad stack">
+    <div class="chips">${[['all','Everything'],['alerts',`Alerts (${S.alerts.length})`],['gardens','Gardens']].map(c => `<button class="chip ${f === c[0] ? 'on' : ''}" data-a="seg:map:${c[0]}">${c[1]}</button>`).join('')}</div>
+    <div class="map"><svg viewBox="0 0 390 300" role="group" aria-label="Map of gardens and plant alerts near you">
+      <rect class="m-land" width="390" height="300"/>
+      <rect class="m-park" x="20" y="24" width="96" height="62" rx="16"/><rect class="m-park" x="276" y="150" width="96" height="70" rx="18"/><rect class="m-park" x="120" y="196" width="70" height="44" rx="14"/>
+      <path class="m-river" stroke-width="30" d="M-20 262C70 232 120 300 205 272S330 226 410 250"/>
+      <path class="m-road" stroke-width="9" d="M-10 118L400 104M210 -10L196 310"/>
+      <path class="m-road" stroke-width="5" d="M-10 52L400 40M-10 176L400 166M70 -10L60 240M300 -10L290 250M136 -10L128 220M356 -10L350 240"/>
+      <text class="m-label" x="222" y="100">Mill Road</text><text class="m-label" x="230" y="34">Northgate Ave</text><text class="m-label" x="14" y="170">Maple Street</text><text class="m-label" x="252" y="284" style="fill:var(--water-ink)">River Trail</text>
+      ${pins}
+      <circle cx="196" cy="160" r="15" fill="var(--water)" opacity=".2"/><circle cx="196" cy="160" r="7" fill="var(--water)" stroke="#fff" stroke-width="3"/>
+    </svg></div>
+    ${list || '<p class="sub">Tap a pin to see what is happening there. The blue dot is you.</p>'}
+    ${showA ? `<h2 style="font-size:20px;margin-top:6px">Alerts near you</h2>${S.alerts.filter(a => a !== selA).map(aCard).join('')}` : ''}
+  </div>`;
+}
+
+function vGarden(id){
+  const g = garden(id), ps = S.plants.filter(p => p.where === id && !p.unnamed), tasks = gardenTasks(g), logs = S.log.filter(l => l.g === id), sup = g.role === 'supervisor';
+  const taskRow = (t, i) => {
+    const col = t.kind === 'water' ? 'var(--water)' : t.kind === 'treat' ? 'var(--alert)' : 'var(--sun)';
+    const act = t.kind === 'water' ? `water:${t.p.id}` : t.kind === 'treat' ? `diagnose:${t.p.id}` : `taskDone:${g.id}:${t.m.id}`;
+    return `<div class="task"><span class="dot" style="background:${col}"></span><div class="grow"><p class="t" style="font-weight:600">${esc(t.text)}</p><p class="sub">${esc(t.sub)}</p></div><button class="btn sm ${t.kind === 'treat' ? 'ghost' : 'soft'}" data-a="${act}">${t.kind === 'treat' ? 'See fix' : 'Done'}</button></div>`;
+  };
+  return navBar('Garden') + `<div class="sec" style="margin-top:14px"><h1 style="font-size:28px;font-weight:800;line-height:1.1">${esc(g.name)}</h1>
+      <p class="sub" style="margin-top:4px">${plural(g.beds, 'bed')} · ${plural(ps.length, 'plant')} · run by ${esc(g.sup)} · ${g.dist}</p>
+      ${g.role ? `<div class="fld" style="margin-top:12px"><span>Viewing as (demo switch)</span><div class="seg"><button class="${!sup ? 'on' : ''}" data-a="role:${g.id}:volunteer">Volunteer</button><button class="${sup ? 'on' : ''}" data-a="role:${g.id}:supervisor">Supervisor</button></div></div>`
+        : `<div class="btnrow" style="margin-top:12px"><button class="btn" data-a="join:${g.id}">Join this garden</button></div><p class="sub" style="margin-top:8px">You are visiting. Join to log care and pick up jobs.</p>`}
+    </div>
+    ${g.role ? `<div class="sec"><h2>Needs doing <small>${tasks.length} open</small></h2><div class="list">${tasks.length ? tasks.map(taskRow).join('') : '<div class="row sub">Nothing needs doing. The next volunteer can relax.</div>'}</div></div>` : ''}
+    <div class="sec"><h2>Already done ${g.role ? `<button class="btn sm" data-a="sheet:log:${g.id}">${I.plus}Log care</button>` : ''}</h2><div class="list">${logs.length ? logs.slice(0, 6).map(logRow).join('') : '<div class="row sub">No care logged yet.</div>'}</div></div>
+    <div class="sec"><h2>Plants ${sup ? '<small>Tap Edit to change care</small>' : ''}</h2><div class="list">${ps.map(p => `<div class="row"><button data-a="push:plant:${p.id}" style="display:flex;gap:12px;align-items:center;flex:1;min-width:0">${plantSVG(p, 40)}<span class="grow"><span class="t">${esc(p.name)}</span><br><span class="sub">${CARE[p.kind].species} · every ${plural(p.every, 'day')} · ${esc(p.sun)}</span></span></button>${pill(mood(p))}${sup ? `<button class="btn ghost sm" data-a="sheet:edit:${p.id}">Edit</button>` : ''}</div>`).join('')}</div>
+      ${sup ? `<div class="btnrow" style="margin-top:10px"><button class="btn ghost" data-a="setup">${I.scanIc}Rescan beds</button></div>` : ''}</div>
+    <div class="sec"><h2>People</h2><div class="list">${g.people.map(m => `<div class="row"><span class="avatar ${m[1] === 'You' ? 'me' : ''}">${initials(m[0])}</span><span class="grow t">${esc(m[0])}</span><span class="sub">${m[1]}</span></div>`).join('')}</div>
+      ${sup && g.code ? `<p class="banner" style="margin-top:10px">Invite code for volunteers: ${g.code}</p>` : ''}</div>`;
+}
+
+function vCommunity(){
+  const seg = S.seg.community, sort = S.seg.sort;
+  let body;
+  if (seg === 'feed'){
+    const ps = [...S.posts].sort((a, b) => sort === 'new' ? a.age - b.age : sort === 'top' ? b.votes - a.votes : (b.votes / (b.age + 8)) - (a.votes / (a.age + 8)));
+    body = `<div class="pad stack"><div class="chips">${[['hot','Hot'],['new','New'],['top','Top']].map(c => `<button class="chip ${sort === c[0] ? 'on' : ''}" data-a="seg:sort:${c[0]}">${c[1]}</button>`).join('')}</div>
+      <div class="list">${ps.map(p => `<div class="post">${voteCol(p)}<button data-a="push:post:${p.id}" style="flex:1;min-width:0"><span class="tag ${tagClass(p.tag)}">${p.tag}</span><h3>${esc(p.title)}</h3><span class="meta">@${p.by}<span class="lvl">${p.lvl}</span>${ageText(p.age)} · ${plural(p.comments.length, 'comment')}</span></button></div>`).join('')}</div></div>`;
+  } else {
+    const rows = [...S.leaders.map(l => ({name:l[0], h:l[1], xp:l[2]})), {name:S.user.name, h:S.user.handle, xp:S.user.xp, me:true}].sort((a, b) => b.xp - a.xp);
+    body = `<div class="pad stack"><p class="sub">Ranked by points earned from answers, tips and garden work this season.</p><div class="list">${rows.map((r, i) => `<div class="row ${r.me ? 'me' : ''}"><span class="rank">${i + 1}</span><span class="avatar ${r.me ? 'me' : ''}">${initials(r.name)}</span><span class="grow"><span class="t">${esc(r.name)}${r.me ? ' (you)' : ''}</span><br><span class="sub">${level(r.xp).name}</span></span><span class="pts">${r.xp.toLocaleString()}</span></div>`).join('')}</div></div>`;
+  }
+  return `<header class="lt"><div><p class="eyebrow">Tips, advice and questions</p><h1>Community</h1></div><button class="iconbtn" data-a="sheet:newpost" aria-label="Write a post">${I.plus}</button></header>
+    <div class="pad" style="margin-bottom:14px"><div class="seg"><button class="${seg === 'feed' ? 'on' : ''}" data-a="seg:community:feed">Feed</button><button class="${seg === 'board' ? 'on' : ''}" data-a="seg:community:board">Leaderboard</button></div></div>${body}`;
+}
+const tagClass = t => t === 'Question' ? 'q' : t === 'Show and tell' ? 'show' : '';
+const ageText = h => h < 1 ? 'just now' : h < 24 ? `${h} h ago` : `${Math.round(h / 24)} d ago`;
+const voteCol = p => `<div class="vote"><button class="up ${p.my === 1 ? 'on' : ''}" data-a="voteP:${p.id}:1" aria-label="Upvote" aria-pressed="${p.my === 1}">${I.up}</button><span>${p.votes}</span><button class="dn ${p.my === -1 ? 'on' : ''}" data-a="voteP:${p.id}:-1" aria-label="Downvote" aria-pressed="${p.my === -1}">${I.down}</button></div>`;
+
+function vPost(id){
+  const p = S.posts.find(x => x.id === id);
+  return navBar('Post') + `<div class="sec" style="margin-top:14px"><div class="card" style="display:flex;gap:10px">${voteCol(p)}<div><span class="tag ${tagClass(p.tag)}">${p.tag}</span><h2 style="font-size:22px;line-height:1.15;margin:4px 0 6px">${esc(p.title)}</h2><p class="meta">@${p.by}<span class="lvl">${p.lvl}</span>${ageText(p.age)}</p><p style="margin-top:10px">${esc(p.body)}</p></div></div></div>
+    <div class="sec"><h2>${plural(p.comments.length, 'comment')}</h2>${p.comments.length ? `<div class="list">${p.comments.map(c => `<div class="row" style="align-items:flex-start"><span class="avatar ${c[0] === S.user.handle ? 'me' : ''}">${c[0].slice(0, 2).toUpperCase()}</span><span class="grow"><span class="sub">@${c[0]}</span><br>${esc(c[1])}</span></div>`).join('')}</div>` : '<p class="sub">No comments yet.</p>'}</div>
+    <div class="sec"><form class="form" data-f="comment:${p.id}"><textarea id="comment-text" name="text" placeholder="Add a comment" required aria-label="Add a comment" style="min-height:64px"></textarea><button class="btn block" type="submit">Comment<span class="pts" style="margin-left:6px">+5</span></button></form></div>`;
+}
+
+function vProfile(){
+  const u = S.user, lv = level(u.xp);
+  return `<header class="lt"><div><p class="eyebrow">Profile</p></div><button class="btn ghost sm" data-a="sheet:tour">Demo guide</button></header>
+    <div class="prof"><span class="avatar me lg">${initials(u.name)}</span><div><h1>${esc(u.name)}</h1><p class="sub">@${u.handle}</p><p style="margin-top:4px"><span class="pill thriving plain">Volunteer · Riverside Community Garden</span></p></div></div>
+    <div class="levelcard"><div class="lv"><div><small>Farmer level ${lv.i + 1} of ${LEVELS.length}</small><div class="name">${lv.name}</div></div><div style="text-align:right"><div class="big">${u.pts.toLocaleString()}</div><small>points to spend</small></div></div>
+      <div class="bar"><i style="width:${lv.pct}%"></i></div><small>${lv.next ? `${(lv.next[1] - u.xp).toLocaleString()} more contribution points to reach ${lv.next[0]}` : 'Top level reached'}</small></div>
+    <div class="sec" style="margin-top:14px"><div class="stats"><div class="stat"><b>${u.answers}</b><span>Answers given</span></div><div class="stat"><b>${u.upvotes}</b><span>Upvotes received</span></div><div class="stat"><b>${u.tasks}</b><span>Garden jobs logged</span></div></div></div>
+    <div class="sec"><h2>Rewards <small>Sample offers</small></h2><div class="list">${S.rewards.map(r => `<div class="reward"><div class="grow"><p class="t" style="font-weight:600">${esc(r.title)}</p><p class="sub">${esc(r.store)}</p></div>${r.code ? `<button class="btn soft sm" data-a="sheet:reward:${r.id}">View code</button>` : `<button class="btn sm" data-a="redeem:${r.id}" ${u.pts < r.cost ? 'disabled' : ''}>${r.cost} pts</button>`}</div>`).join('')}</div></div>
+    <div class="sec"><h2>Levels</h2><div class="list">${LEVELS.map((l, i) => `<div class="row ${i === lv.i ? 'me' : ''}"><span class="rank">${i + 1}</span><span class="grow t">${l[0]}</span><span class="sub">${i === lv.i ? 'You are here' : l[1].toLocaleString() + ' pts'}</span></div>`).join('')}</div></div>
+    <div class="sec"><h2>How you earn points</h2><div class="list">${EARN.map(e => `<div class="row"><span class="grow">${e[0]}</span><span class="pts">+${e[1]}</span></div>`).join('')}</div></div>
+    <div class="sec"><h2>Recent points</h2><div class="list">${u.history.slice(0, 8).map(h => `<div class="row"><span class="grow"><span class="t">${esc(h.why)}</span><br><span class="sub">${h.when}</span></span><span class="pts">${h.n > 0 ? '+' : ''}${h.n}</span></div>`).join('')}</div></div>`;
+}
+
+/* ---------- sheets ---------- */
+function editor(base, o){
+  return `<label class="fld"><span>Name</span><input id="ed-name" type="text" value="${esc(o.name)}" data-bind="${base}.name" maxlength="24"></label>
+    <div class="fld"><span>Water schedule</span><div class="stepper"><button type="button" data-a="step:${base}.every:-1" aria-label="Water more often">−</button><output>Every ${plural(o.every, 'day')}</output><button type="button" data-a="step:${base}.every:1" aria-label="Water less often">+</button></div></div>
+    <div class="fld"><span>Sunlight exposure</span><div class="seg">${SUNS.map(s => `<button type="button" class="${o.sun === s ? 'on' : ''}" data-a="setv:${base}.sun:${s}">${s}</button>`).join('')}</div></div>
+    <label class="fld"><span>Fertilizer</span><select id="ed-fert" data-bind="${base}.fert">${FERTS.map(f => `<option ${o.fert === f ? 'selected' : ''}>${f}</option>`).join('')}</select></label>
+    <label class="fld"><span>Soil</span><select id="ed-soil" data-bind="${base}.soil">${SOILS.map(f => `<option ${o.soil === f ? 'selected' : ''}>${f}</option>`).join('')}</select></label>
+    <label class="fld"><span>Note for volunteers</span><textarea id="ed-note" data-bind="${base}.note" style="min-height:60px" placeholder="Anything the next person should know">${esc(o.note)}</textarea></label>`;
+}
+function sheetHTML(){
+  const sh = S.sheet;
+  switch (sh.type){
+    case 'ask': return ['Ask the ' + CARE[sh.a].species.toLowerCase() + ' forum', `<form class="form" data-f="ask:${sh.a}"><label class="fld"><span>Your question</span><textarea id="ask-text" name="text" required placeholder="Describe what you are seeing"></textarea></label><button class="btn block" type="submit">Post question</button><p class="sub">People who answer earn points, so questions usually get a reply within a day.</p></form>`];
+    case 'newpost': return ['New post', `<form class="form" data-f="post"><label class="fld"><span>Type</span><select id="post-tag" name="tag"><option>Tip</option><option>Advice</option><option>Question</option><option>Show and tell</option></select></label><label class="fld"><span>Title</span><input id="post-title" type="text" name="title" required maxlength="80" placeholder="Keep it short"></label><label class="fld"><span>Details</span><textarea id="post-body" name="body" required placeholder="What should other gardeners know?"></textarea></label><button class="btn block" type="submit">Post<span class="pts" style="margin-left:6px">+10</span></button></form>`];
+    case 'rename': { const p = plant(sh.a); return ['Rename ' + p.name, `<form class="form" data-f="rename:${p.id}"><label class="fld"><span>Name</span><input id="rename-name" type="text" name="name" value="${esc(p.name)}" required maxlength="24"></label><button class="btn block" type="submit">Save name</button></form>`]; }
+    case 'name': { const p = plant(sh.a); return ['Name this ' + CARE[p.kind].species.toLowerCase(), `<div style="display:grid;place-items:center">${plantSVG(p, 110)}</div><form class="form" data-f="name:${p.id}"><label class="fld"><span>Give it a name. It is harder to neglect a plant called Gerald.</span><input id="name-name" type="text" name="name" required maxlength="24" placeholder="Plant name"></label><div class="chips">${['Pepper Ann','Bell','Capsi','Gerald'].map(n => `<button type="button" class="chip" data-a="fill:name-name:${n}">${n}</button>`).join('')}</div><button class="btn block" type="submit">Add to my buddies<span class="pts" style="margin-left:6px">+20</span></button></form>`]; }
+    case 'log': { const g = garden(sh.a), ps = S.plants.filter(p => p.where === g.id && !p.unnamed);
+      return ['Log care', `<form class="form" data-f="log:${g.id}"><label class="fld"><span>Plant</span><select id="log-plant" name="plant">${ps.map(p => `<option value="${p.id}">${esc(p.name)} (${CARE[p.kind].species})</option>`).join('')}<option value="">Whole garden</option></select></label>
+        <label class="fld"><span>What did you do?</span><select id="log-action" name="action">${['Watered','Fertilized','Pruned','Weeded','Harvested','Checked for pests'].map(a => `<option>${a}</option>`).join('')}</select></label>
+        <label class="fld"><span>Note for the next volunteer</span><textarea id="log-note" name="note" style="min-height:64px" placeholder="Optional"></textarea></label>
+        <button class="btn block" type="submit">Save to garden log<span class="pts" style="margin-left:6px">+10</span></button></form>`]; }
+    case 'edit': { const p = plant(sh.a); return ['Edit plant care', `<div class="form">${editor('p-' + p.id, p)}<button class="btn block" data-a="saveEdit">Save for all volunteers</button></div>`]; }
+    case 'photos': return ['Garden album', `<p class="sub">Photos taken in the app are shared with the garden so the next volunteer can compare.</p><div class="photos">${S.photos.map(ph => `<div class="photo">${thumbHTML(ph)}<span>${esc(ph.label)}</span></div>`).join('')}</div>`];
+    case 'reward': { const r = S.rewards.find(x => x.id === sh.a); return [r.store, `<p style="font-weight:600;font-size:17px">${esc(r.title)}</p><div class="code">${r.code}</div><p class="sub">Sample code for the demo. In the real app this would scan at the till or apply at online checkout.</p><button class="btn block" data-a="copy:${r.code}">Copy code</button>`]; }
+    case 'camsrc': { const cm = S.cam; return ['Camera source', `<div class="list">
+        <button class="row" data-a="camSrc:live"><span class="grow"><span class="t">Live camera</span><br><span class="sub">${cm.blocked ? 'Blocked on this page. Live video works when the demo is opened from its own https address, not inside the Claude viewer.' : 'Uses the back camera on your phone. The browser asks for permission first.'}</span></span>${cm.src === 'live' ? `<span class="pill thriving plain">On</span>` : I.chev}</button>
+        <label class="row filepick"><span class="grow"><span class="t">Take a photo</span><br><span class="sub">Opens the phone camera, then uses your photo as the view. Works on every page.</span></span>${cm.src === 'photo' ? `<span class="pill thriving plain">On</span>` : I.chev}<input type="file" id="cam-file" accept="image/*" capture="environment" data-file aria-label="Take a photo"></label>
+        <button class="row" data-a="camSrc:sample"><span class="grow"><span class="t">Sample garden</span><br><span class="sub">An illustrated bed with six plants.</span></span>${cm.src === 'sample' ? `<span class="pill thriving plain">On</span>` : I.chev}</button></div>
+      <div class="card form"><div><p style="font-weight:700">Live plant recognition</p><p class="sub">Paste the link to a Teachable Machine image model trained on your plants. With the live camera on, the app names the plant in view a few times a second.</p></div>
+        <form class="form" data-f="recLoad"><input id="rec-url" type="text" name="url" value="${esc(S.rec.url)}" placeholder="https://teachablemachine.withgoogle.com/models/…/" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Model link"><button class="btn block" type="submit" ${S.rec.status === 'loading' ? 'disabled' : ''}>${S.rec.status === 'loading' ? 'Loading model…' : S.rec.status === 'ready' ? 'Reload model' : 'Load model'}</button></form>
+        ${S.rec.status === 'error' ? `<p class="banner" style="background:var(--alert-soft);color:var(--alert-ink)">${esc(S.rec.err)}</p>` : ''}
+        ${S.rec.status === 'ready' ? `<p class="sub">Model loaded with ${(S.rec.labels.length + ' classes')}. Choose which buddy each one opens.</p>${S.rec.labels.map((l, i) => `<label class="fld"><span>When it sees “${esc(l)}”</span><select id="rec-map-${i}" data-rec="${i}"><option value="">Ignore it</option>${recPool().map(p => `<option value="${p.id}" ${S.rec.map[l] === p.id ? 'selected' : ''}>${esc(p.name)} (${CARE[p.kind].species})</option>`).join('')}</select></label>`).join('')}<button class="btn ghost sm" data-a="recOff">Turn recognition off</button>` : ''}</div>
+      <p class="sub">${S.rec.status === 'ready' ? 'Care details and diagnoses are still sample data for the buddy you link.' : 'Without a model, plant names and diagnoses are sample data and the brackets stay where you tap.'}</p>`]; }
+    case 'dx': return dxSheet(sh);
+    case 'setup': return setupSheet(sh);
+    case 'tour': return ['Demo guide', `<p class="sub">Everything here runs on sample data. Nothing is sent anywhere, and it resets when you reload.</p><div class="list">${[
+      ['Scan a plant with AR','Scan tab. Tap a plant in Identify mode.','go:scan'],
+      ['Use the live camera or your own photo','Scan tab. Tap the camera source at the top left.','go:scan'],
+      ['Recognise your own plants live','Scan tab, camera source. Paste a trained model link.','go:scan'],
+      ['Diagnose a problem and see products','Scan tab, Diagnose mode. Tap Kale-b.','go:scan:diagnose'],
+      ['Name a new plant','Scan tab. Tap the bell pepper.','go:scan'],
+      ['Plant moods, care steps and forum','Buddies tab. Open any plant.','go:buddies'],
+      ['Shared garden log and jobs','Gardens tab. Open Riverside.','go:gardens:mine'],
+      ['Supervisor setup with an AR scan','Gardens tab. Set up a new garden.','setup'],
+      ['Map of nearby plant alerts','Gardens tab, Map.','go:gardens:map'],
+      ['Posts, votes and leaderboard','Community tab.','go:community'],
+      ['Levels and store rewards','Profile tab.','go:profile'],
+    ].map(t => `<button class="row" data-a="${t[2]}"><span class="grow"><span class="t">${t[0]}</span><br><span class="sub">${t[1]}</span></span>${I.chev}</button>`).join('')}</div>`];
+  }
+}
+function dxSheet(sh){
+  const p = plant(sh.a), name = p.unnamed ? 'This ' + CARE[p.kind].species.toLowerCase() : p.name;
+  if (sh.scanning) return ['Scanning ' + name, `<div class="dx-scan">${plantSVG(p, 150)}</div><p class="sub" style="text-align:center">Checking leaves, stems and soil for 40 common problems…</p>`];
+  const key = issueOf(p);
+  if (!key) return ['No problems found', `<div class="dx-top">${plantSVG(p, 84)}<div><p style="font-weight:600;font-size:17px">${esc(name)} looks healthy.</p><p class="sub">Leaves, stems and soil all check out. Scan again if anything changes.</p></div></div><button class="btn block" data-a="close">Done</button>`];
+  const d = ISSUES[key];
+  return [d.name, `<div class="dx-top">${plantSVG(p, 84)}<div><p class="sub">Found on ${esc(name)}</p><div class="chips" style="margin:6px 0"><span class="pill sick plain">${d.sev}</span><span class="pill okay plain">${d.conf}% match</span></div><div class="bar"><i style="width:${d.conf}%;background:var(--alert)"></i></div></div></div>
+    <p>${d.what}</p>
+    <div><h3 style="font-size:17px;margin-bottom:8px">What to do</h3><ol class="fix">${d.fix.map(f => `<li><span>${f}</span></li>`).join('')}</ol></div>
+    <div><h3 style="font-size:17px;margin-bottom:8px">Products that help</h3><div class="list">${d.products.map((pr, i) => `<div class="prod"><p style="font-weight:600">${pr[0]}</p><div class="stores">${pr[1].map((s, j) => `<button class="btn ghost sm" data-a="store:${key}:${i}:${j}">${esc(s[0])} · ${s[1]}</button>`).join('')}</div></div>`).join('')}</div>
+      <p class="sub" style="margin-top:8px">Affiliate links. Open Sprouts earns a small commission when you buy. Prices are samples.</p></div>
+    ${key === 'dry' ? `<button class="btn water block" data-a="water:${p.id}">${I.drop}Water ${esc(name)} now</button>` : `<button class="btn block" data-a="treated:${p.id}">Mark as treated<span class="pts" style="margin-left:6px">+15</span></button>`}`];
+}
+function setupSheet(sh){
+  const dots = `<div class="wsteps">${[0,1,2,3].map(i => `<i class="${i <= sh.step ? 'on' : ''}"></i>`).join('')}</div>`;
+  if (sh.step === 0) return ['Set up a garden', dots + `<p class="sub">You scan the beds once. Open Sprouts builds the plant list and care schedule, so volunteers do not have to ask you what needs doing.</p>
+    <label class="fld"><span>Garden name</span><input id="setup-name" type="text" data-bind="sheet.name" value="${esc(sh.name)}" maxlength="40" placeholder="Garden name"></label>
+    <button class="btn block" data-a="setupNext">Next: scan the beds</button>`];
+  if (sh.step === 1){
+    const done = sh.found >= SCENE.length, live = S.cam.src === 'live';
+    const view = live ? `<div class="media" data-media></div>${sh.scanning ? '<span class="wsweep"></span>' : ''}${WPOS.slice(0, Math.min(sh.found, SCENE.length)).map((q, i) => `<div class="mark sm" style="left:${q[0]}%;top:${q[1]}%">${BRACKET}<span class="mk-label">${CARE[sh.plants[i].kind].species}</span></div>`).join('')}` : sceneSVG({overlay:true, found:sh.found, tap:false, generic:true});
+    return ['Scan the beds', dots + `<div class="wscan">${view}<span class="count">${sh.scanning ? 'Scanning… ' : ''}${plural(Math.min(sh.found, SCENE.length), 'plant')} found</span></div>
+      <p class="sub">${done ? 'All beds scanned. Next, check what the scan found and correct anything it got wrong.' : 'Walk slowly along each bed with the camera pointed at the plants. ' + (live ? 'The plants it finds are sample data.' : 'This view is a sample garden.')}</p>
+      ${!live && !done && !sh.scanning && !S.cam.blocked ? '<button class="btn ghost block" data-a="wizLive">Use the live camera instead</button>' : ''}
+      ${done ? '<button class="btn block" data-a="setupNext">Next: review plants</button>' : `<button class="btn block" data-a="setupScan" ${sh.scanning ? 'disabled' : ''}>${I.scanIc}${sh.scanning ? 'Scanning…' : 'Start AR scan'}</button>`}`];
+  }
+  if (sh.step === 2) return ['Review plants', dots + `<p class="sub">Tap a plant to edit its name, water schedule, sunlight, fertilizer and soil.</p>
+    <div class="stack">${sh.plants.map((o, i) => sh.open === i
+      ? `<div class="card form"><div style="display:flex;gap:10px;align-items:center">${plantSVG(o, 48, 'okay')}<div><p style="font-weight:700">${CARE[o.kind].species}</p><p class="sub">Detected by scan</p></div></div>${editor('setup.' + i, o)}</div>`
+      : `<button class="card" data-a="setupOpen:${i}" style="display:flex;gap:10px;align-items:center;width:100%">${plantSVG(o, 40, 'okay')}<span class="grow" style="flex:1"><b>${esc(o.name)}</b><br><span class="sub">Every ${plural(o.every, 'day')} · ${esc(o.sun)} · ${esc(o.fert)}</span></span>${I.chev}</button>`).join('')}</div>
+    <button class="btn block" data-a="setupNext">Looks right. Create garden</button>`];
+  return ['Garden ready', dots + `<div style="display:flex;justify-content:center">${sh.plants.slice(0, 5).map(o => plantSVG(o, 56, 'thriving')).join('')}</div>
+    <p style="font-weight:600;font-size:17px;text-align:center">${esc(sh.name || 'Your garden')} has ${plural(sh.plants.length, 'plant')} and a care schedule.</p>
+    <div class="code">${sh.code}</div><p class="sub" style="text-align:center">Share this code with volunteers. They will see what has been done and what needs doing.</p>
+    <button class="btn block" data-a="setupDone">Open garden</button>`];
+}
+
+/* ---------- rendering ---------- */
+const TABS = [['buddies','Buddies',I.tBuddies],['gardens','Gardens',I.tGardens],['scan','Scan',I.scanIc],['community','Community',I.tCommunity],['profile','Profile',I.tProfile]];
+const scrollMem = {}; let lastKey = '';
+const viewKey = () => { const t = cur(); return S.tab + (t ? `/${t.v}/${t.id}/${t.x || ''}` : ''); };
+function viewHTML(){
+  const t = cur();
+  if (t) switch (t.v){ case 'plant': return vPlant(t.id); case 'q': return vQuestion(t); case 'garden': return vGarden(t.id); case 'post': return vPost(t.id); }
+  return {buddies:vBuddies, gardens:vGardens, scan:vScan, community:vCommunity, profile:vProfile}[S.tab]();
+}
+function render(enter){
+  const scr = $('#screen'), key = viewKey(), cam = S.tab === 'scan' && !cur();
+  if (lastKey) scrollMem[lastKey] = scr.scrollTop;
+  scr.className = 'screen' + (cam ? ' is-cam' : '') + (enter ? ' enter' : '');
+  scr.innerHTML = viewHTML();
+  scr.scrollTop = scrollMem[key] || 0;
+  lastKey = key;
+  $('#phone').classList.toggle('cammode', cam);
+  $('#tabbar').innerHTML = TABS.map(t => `<button class="${t[0] === 'scan' ? 'scan ' : ''}${S.tab === t[0] ? 'on' : ''}" data-a="tab:${t[0]}" ${S.tab === t[0] ? 'aria-current="page"' : ''}>${t[0] === 'scan' ? `<span class="ring">${t[2]}</span>` : t[2]}${t[1]}</button>`).join('');
+  renderSheet();
+}
+function renderSheet(){
+  const r = $('#sheet-root');
+  if (!S.sheet){ r.innerHTML = ''; return syncCamera(); }
+  const fresh = S.sheet.fresh; S.sheet.fresh = false;
+  const sc = r.querySelector('.sheet-body')?.scrollTop || 0;
+  const [title, body] = sheetHTML();
+  r.innerHTML = `<div class="backdrop ${fresh ? 'in' : ''}" data-a="close"></div><div class="sheet ${fresh ? 'in' : ''} ${S.sheet.type === 'setup' ? 'full' : ''}" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="grab"></div><div class="sheet-head"><h2>${esc(title)}</h2><button data-a="close" aria-label="Close">${I.x}</button></div><div class="sheet-body">${body}</div></div>`;
+  if (!fresh) r.querySelector('.sheet-body').scrollTop = sc;
+  syncCamera();
+}
+function toast(msg, kind = ''){
+  const el = document.createElement('div'); el.className = 'toast ' + kind; el.textContent = msg;
+  const root = $('#toast-root'); while (root.children.length > 1) root.firstChild.remove();
+  root.appendChild(el);
+  setTimeout(() => el.classList.add('out'), 2400); setTimeout(() => el.remove(), 2800);
+}
+function earn(n, why){
+  const before = level(S.user.xp).i;
+  S.user.pts += n; S.user.xp += n; S.user.history.unshift({n, why, when:'Just now'});
+  toast(`+${n} points · ${why}`, 'pts');
+  if (level(S.user.xp).i > before) setTimeout(() => toast(`Level up. You are now a ${level(S.user.xp).name}.`, 'lvl'), 800);
+}
+function openSheet(type, a, extra = {}){ S.sheet = {type, a, fresh:true, ...extra}; renderSheet(); }
+function resolve(path){
+  const parts = path.split('.');
+  if (parts[0] === 'sheet') return [S.sheet, parts[1]];
+  if (parts[0] === 'setup') return [S.sheet.plants[+parts[1]], parts[2]];
+  return [plant(parts[0].slice(2)), parts[1]];
+}
+
+/* ---------- actions ---------- */
+const A = {
+  tab(t){ if (S.tab === t) S.nav[t] = []; S.tab = t; S.sheet = null; S.scan.sel = null; if (t === 'scan') enterScan(); render(); },
+  go(t, seg){ S.tab = t; S.nav[t] = []; S.sheet = null; if (t === 'gardens' && seg) S.seg.gardens = seg; if (t === 'scan'){ S.scan.mode = seg || 'identify'; S.scan.sel = null; enterScan(); } render(); },
+  push(v, id, x){ if (v === 'plant'){ S.seg.plant = 'care'; S.forumQ = ''; } S.nav[S.tab].push({v, id, x}); delete scrollMem[viewKey()]; render(true); },
+  back(){ S.nav[S.tab].pop(); render(); },
+  seg(k, v){ S.seg[k] = v; if (k === 'map') S.mapSel = null; render(); },
+  close(){ S.sheet = null; render(); },
+  sheet(type, a){ openSheet(type, a); },
+  water(id){
+    const p = plant(id); p.last = 0;
+    S.log.unshift({g:p.where, plant:id, action:'Watered', who:'You', days:0, note:''});
+    S.user.tasks++; if (S.sheet) S.sheet = null;
+    render(); earn(10, `Watered ${p.name}`);
+  },
+  feed(id){ const p = plant(id); p.fed = 0; S.log.unshift({g:p.where, plant:id, action:'Fertilized', who:'You', days:0, note:''}); S.user.tasks++; render(); earn(10, `Fed ${p.name}`); },
+  check(id, i){ S.checks[id + i] = !S.checks[id + i]; render(); },
+  diagnose(id){ openSheet('dx', id, {scanning:true}); setTimeout(() => { if (S.sheet?.type === 'dx' && S.sheet.a === id){ S.sheet.scanning = false; renderSheet(); } }, 1500); },
+  treated(id){ const p = plant(id), n = ISSUES[p.issue].name.toLowerCase(); p.issue = null; S.log.unshift({g:p.where, plant:id, action:'Treated for ' + n, who:'You', days:0, note:''}); S.user.tasks++; S.sheet = null; render(); earn(15, `Treated ${p.name}`); },
+  store(key, i, j){ toast(`Demo link. This would open ${ISSUES[key].products[i][1][j][0]} with the Open Sprouts affiliate tag.`); },
+  scanMode(m){ S.scan.mode = m; S.scan.sel = null; render(); },
+  camSrc(src){ S.cam.src = src; S.cam.marks = []; S.cam.tried = true; S.scan.sel = null; S.scan.busy = null; S.sheet = null; camPref(src === 'live'); render(); },
+  wizLive(){ S.cam.src = 'live'; S.cam.marks = []; renderSheet(); },
+  liveTap(){
+    if (S.scan.busy) return;
+    if (S.cam.src === 'live' && S.rec.status === 'ready'){
+      const id = S.rec.locked;
+      if (!id) return toast('No plant recognised yet. Point the camera at one of your plants.');
+      if (S.scan.mode === 'diagnose') return A.scanDx(id);
+      S.rec.dismissed = null; S.scan.sel = id; return render();
+    }
+    const r = $('.cam').getBoundingClientRect(), e = lastEvt;
+    const x = Math.max(22, Math.min(78, (e.clientX - r.left) / r.width * 100)), y = Math.max(42, Math.min(64, (e.clientY - r.top) / r.height * 100));
+    const id = SCENE[S.cam.n++ % SCENE.length].id, m = {x, y, id, pending: S.scan.mode === 'identify'};
+    S.cam.marks = [...S.cam.marks.filter(k => k.id !== id).slice(-2), m]; S.scan.sel = null;
+    if (S.scan.mode === 'diagnose') return A.scanDx(id);
+    render();
+    setTimeout(() => { m.pending = false; if (S.tab === 'scan' && S.cam.marks.includes(m)){ S.scan.sel = id; render(); } }, 900);
+  },
+  scanClose(){ S.scan.sel = null; if (S.rec.locked) S.rec.dismissed = S.rec.locked; render(); },
+  recOff(){ S.rec.status = 'off'; S.rec.url = ''; S.rec.labels = []; S.rec.map = {}; recModel = null; recReset(); S.cam.marks = []; recSave(); renderSheet(); },
+  scanTap(id){
+    if (S.scan.busy) return;
+    S.scan.sel = id;
+    if (S.scan.mode === 'diagnose') return A.scanDx(id);
+    render();
+  },
+  scanDx(id){
+    S.scan.mode = 'diagnose'; S.scan.sel = id; S.scan.busy = id; render();
+    setTimeout(() => { S.scan.busy = null; if (S.tab === 'scan'){ render(); openSheet('dx', id); } }, 1500);
+  },
+  snap(){
+    const f = $('#flash'); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
+    let url = null;
+    if (S.cam.src === 'photo') url = S.cam.photo;
+    else if (S.cam.src === 'live' && video.videoWidth){
+      const c = document.createElement('canvas'); c.width = 480; c.height = Math.round(480 * video.videoHeight / video.videoWidth);
+      try { c.getContext('2d').drawImage(video, 0, 0, c.width, c.height); url = c.toDataURL('image/jpeg', .8); } catch (e) {}
+    }
+    S.photos.unshift({id:Date.now(), label:url ? 'Just now' : 'Bed 1, just now', url});
+    const roll = $('.cam-roll'); if (roll){ roll.lastChild.textContent = S.photos.length; roll.querySelector('.thumb').innerHTML = thumbHTML(S.photos[0]); }
+    toast('Photo saved to the garden album');
+  },
+  openPlant(id){ S.tab = 'buddies'; S.nav.buddies = [{v:'plant', id}]; S.seg.plant = 'care'; S.scan.sel = null; render(true); },
+  fill(inputId, v){ const el = document.getElementById(inputId); el.value = v; el.focus(); },
+  voteQ(kind, qid){ const q = S.forum[kind].find(x => x.id === qid); q.voted = !q.voted; q.votes += q.voted ? 1 : -1; render(); },
+  voteA(kind, qid, i){ const a = S.forum[kind].find(x => x.id === qid).answers[+i]; a.voted = !a.voted; a.votes += a.voted ? 1 : -1; render(); },
+  voteP(id, d){ const p = S.posts.find(x => x.id === id); d = +d; p.votes -= p.my; p.my = p.my === d ? 0 : d; p.votes += p.my; render(); },
+  join(id){ const g = garden(id); g.role = 'volunteer'; g.people.push([S.user.name, 'You']); render(); toast(`You joined ${g.name}`); },
+  role(id, r){ garden(id).role = r; render(); },
+  taskDone(gid, tid){ const g = garden(gid), t = g.tasks.find(x => x.id === tid); g.tasks = g.tasks.filter(x => x !== t); S.log.unshift({g:gid, plant:null, action:t.text, who:'You', days:0, note:''}); S.user.tasks++; render(); earn(10, 'Garden job done'); },
+  mapSel(id){ S.mapSel = S.mapSel === id ? null : id; render(); },
+  help(id){ const a = S.alerts.find(x => x.id === id); a.helping = !a.helping; a.helpers += a.helping ? 1 : -1; render(); if (a.helping) earn(20, 'Offered to help a neighbour'); },
+  redeem(id){ const r = S.rewards.find(x => x.id === id); if (S.user.pts < r.cost) return; S.user.pts -= r.cost; r.code = 'SPROUT-' + (1000 + Math.floor(Math.random() * 9000)); S.user.history.unshift({n:-r.cost, why:`Redeemed: ${r.title}`, when:'Just now'}); render(); openSheet('reward', id); },
+  copy(code){ navigator.clipboard?.writeText(code).then(() => toast('Code copied'), () => toast('Copy is blocked here. Select the code to copy it.')); },
+  step(path, d){ const [o, k] = resolve(path); o[k] = Math.max(1, Math.min(30, o[k] + +d)); renderSheet(); },
+  setv(path, v){ const [o, k] = resolve(path); o[k] = v; renderSheet(); },
+  saveEdit(){ const p = plant(S.sheet.a); S.sheet = null; render(); toast(`Care plan updated for ${p.name}`); },
+  setup(){
+    S.sheet = {type:'setup', fresh:true, step:0, name:'', found:0, scanning:false, open:0, code:'SPROUT-' + (1000 + Math.floor(Math.random() * 9000)),
+      plants:SCENE.map((sp, i) => { const k = plant(sp.id).kind, c = CARE[k]; return {name:`${c.species} ${i + 1}`, kind:k, pot:i, every:c.every, sun:c.sun, soil:c.soil, fert:c.fert, note:''}; })};
+    renderSheet();
+  },
+  setupNext(){
+    const sh = S.sheet;
+    if (sh.step === 0 && !sh.name.trim()){ toast('Give the garden a name first'); document.getElementById('setup-name')?.focus(); return; }
+    sh.step++; sh.fresh = false; renderSheet(); $('#sheet-root .sheet-body').scrollTop = 0;
+  },
+  setupScan(){
+    const sh = S.sheet; sh.scanning = true; renderSheet();
+    const tick = setInterval(() => {
+      if (S.sheet !== sh){ clearInterval(tick); return; }
+      sh.found++; if (sh.found >= SCENE.length){ sh.scanning = false; clearInterval(tick); }
+      renderSheet();
+    }, 550);
+  },
+  setupOpen(i){ S.sheet.open = +i; renderSheet(); },
+  setupDone(){
+    const sh = S.sheet, id = 'g' + (S.gardens.length + 1);
+    S.gardens.unshift({id, name:sh.name.trim() || 'New garden', role:'supervisor', sup:S.user.name, dist:'0.1 km', beds:2, code:sh.code, about:'Set up with an AR scan.', people:[[S.user.name, 'You']], tasks:[]});
+    S.gpins[id] = [226, 146];
+    sh.plants.forEach((o, i) => S.plants.push(mk(id + 'p' + i, o.name.trim() || CARE[o.kind].species, o.kind, id, 1, {pot:o.pot, bed:'Bed ' + (i < 3 ? 1 : 2), every:o.every, sun:o.sun, soil:o.soil, fert:o.fert, note:o.note})));
+    S.sheet = null; S.tab = 'gardens'; S.seg.gardens = 'mine'; S.nav.gardens = [{v:'garden', id}];
+    render(true); earn(50, 'Set up a garden');
+  },
+};
+const F = {
+  recLoad(fd){ recLoad(fd.get('url') || '').then(recKick); },
+  ask(kind, fd){ S.forum[kind].unshift({id:'q' + Date.now(), q:fd.get('text').trim(), by:S.user.handle, votes:1, voted:true, answers:[]}); S.sheet = null; render(); toast('Question posted to the forum'); },
+  answer(kind, qid, fd){
+    const q = S.forum[kind].find(x => x.id === qid), a = {by:S.user.handle, lvl:level(S.user.xp).name, text:fd.get('text').trim(), votes:0, voted:false, mine:true};
+    q.answers.push(a); S.user.answers++; render(); earn(15, 'Answered a question');
+    setTimeout(() => { a.votes++; S.user.upvotes++; S.user.pts += 5; S.user.xp += 5; S.user.history.unshift({n:5, why:'Upvote from @priya_plants', when:'Just now'}); toast('+5 points · @priya_plants upvoted your answer', 'pts'); render(); }, 3200);
+  },
+  post(fd){ S.posts.unshift({id:'p' + Date.now(), tag:fd.get('tag'), title:fd.get('title').trim(), body:fd.get('body').trim(), by:S.user.handle, lvl:level(S.user.xp).name, votes:1, my:1, age:0, comments:[]}); S.sheet = null; S.seg.sort = 'new'; S.seg.community = 'feed'; render(); earn(10, 'Shared a post'); },
+  comment(pid, fd){ S.posts.find(x => x.id === pid).comments.push([S.user.handle, fd.get('text').trim()]); render(); earn(5, 'Commented'); },
+  rename(pid, fd){ plant(pid).name = fd.get('name').trim() || plant(pid).name; S.sheet = null; render(); toast('Name saved'); },
+  name(pid, fd){ const p = plant(pid); p.name = fd.get('name').trim(); if (!p.name) return; p.unnamed = false; p.mine = true; S.sheet = null; S.scan.sel = null; render(); earn(20, `${p.name} joined your buddies`); },
+  log(gid, fd){
+    const pid = fd.get('plant') || null, action = fd.get('action'), p = pid && plant(pid);
+    if (p && action === 'Watered') p.last = 0;
+    if (p && action === 'Fertilized') p.fed = 0;
+    S.log.unshift({g:gid, plant:pid, action, who:'You', days:0, note:fd.get('note').trim()});
+    S.user.tasks++; S.sheet = null; render(); earn(10, 'Logged garden care');
+  },
+};
+
+/* ---------- events ---------- */
+let lastEvt = null;
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-a]'); if (!el || el.disabled) return;
+  lastEvt = e;
+  const [name, ...args] = el.dataset.a.split(':');
+  A[name]?.(...args);
+});
+document.addEventListener('keydown', e => {
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches?.('[data-a][tabindex]')){ e.preventDefault(); e.target.dispatchEvent(new MouseEvent('click', {bubbles:true})); }
+  if (e.key === 'Escape' && S.sheet) A.close();
+});
+document.addEventListener('submit', e => {
+  e.preventDefault();
+  const [name, ...args] = e.target.dataset.f.split(':');
+  F[name]?.(...args, new FormData(e.target));
+});
+function bind(e){
+  const t = e.target;
+  if (t.dataset?.file !== undefined){
+    if (e.type === 'change' && t.files?.[0]){ S.cam.photo = URL.createObjectURL(t.files[0]); S.cam.src = 'photo'; S.cam.marks = []; S.cam.tried = true; S.scan.sel = null; S.sheet = null; camPref(false); render(); }
+    return;
+  }
+  if (t.dataset?.rec !== undefined){ S.rec.map[S.rec.labels[+t.dataset.rec]] = t.value; recSave(); recReset(); return; }
+  if (t.dataset?.bind){ const [o, k] = resolve(t.dataset.bind); o[k] = t.value; }
+  if (t.dataset?.filter){
+    S.forumQ = t.value; const f = t.value.toLowerCase(); let n = 0;
+    document.querySelectorAll('#' + t.dataset.filter + ' [data-text]').forEach(r => { const ok = r.dataset.text.includes(f); r.hidden = !ok; if (ok) n++; });
+    const list = document.getElementById(t.dataset.filter); list.hidden = !n;
+    document.getElementById(t.dataset.filter + '-empty').hidden = !!n;
+  }
+}
+document.addEventListener('input', bind);
+document.addEventListener('change', bind);
+render();
+</script>
+</body>
+</html>

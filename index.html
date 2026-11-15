@@ -203,7 +203,7 @@ svg{display:block}
 .answer{display:flex;gap:10px;padding:14px;border-top:1px solid var(--line)}
 .answer:first-child{border-top:0}
 .answer.mine{background:var(--leaf-soft)}
-textarea,input[type=text],select{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:44px}
+textarea,input[type=text],input[type=number],select{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:44px}
 textarea{min-height:88px;resize:vertical}
 .fld{display:flex;flex-direction:column;gap:6px}
 .fld>span{font-size:13px;font-weight:600;color:var(--ink-2)}
@@ -320,6 +320,22 @@ textarea{min-height:88px;resize:vertical}
 .reward:first-child{border-top:0}
 .code{font:700 22px ui-monospace,Menlo,monospace;letter-spacing:.08em;background:var(--surface-2);border-radius:12px;padding:14px;text-align:center}
 
+/* Soil test */
+.sbar{position:relative;height:10px;border-radius:5px;background:var(--surface-2);grid-column:1/-1;margin:4px 0 2px}
+.sbar .band{position:absolute;top:0;bottom:0;border-radius:5px;background:var(--leaf);opacity:.3}
+.sbar .dot{position:absolute;top:-4px;width:18px;height:18px;margin-left:-9px;border-radius:50%;border:3px solid var(--surface);background:var(--ink)}
+.srow{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;padding:12px 14px;border-top:1px solid var(--line)}
+.srow:first-child{border-top:0}
+.srow b{font:800 20px var(--display);font-variant-numeric:tabular-nums}
+.soil-art{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px}
+.soil-art svg{width:100%;height:auto}
+.soil-art text{font:600 10px var(--body);fill:var(--ink-2)}
+.labnum{width:26px;height:26px;border-radius:50%;background:var(--water);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+.note{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--leaf);border-radius:14px;padding:12px 14px}
+.dots3::after{content:"";display:inline-block;width:1.2em;text-align:left;animation:dots3 1.2s steps(4,end) infinite}
+@keyframes dots3{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
 /* Sheets and toasts */
 #sheet-root{position:absolute;inset:0;pointer-events:none;z-index:10}
 #sheet-root>*{pointer-events:auto}
@@ -415,6 +431,7 @@ const I = {
   feed:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-9M12 12c0-4 3-7 7-7 0 4-3 7-7 7zM12 15c0-3-2-5-6-5 0 3 2 5 6 5z"/></svg>',
   scanIc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg>',
   tool:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 6l4 4M4 20l9-9M13 7l2-3 5 5-3 2z"/></svg>',
+  lab:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3M7.5 15h9"/></svg>',
   tBuddies:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14V8M12 9c0-3 2-5 5-5 0 3-2 5-5 5zM12 11c0-2-2-4-5-4 0 2 2 4 5 4z"/><path d="M6 14h12l-1.5 6h-9z"/></svg>',
   tGardens:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>',
   tCommunity:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h11a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H9l-4 3v-3H4z"/><path d="M17 9h3v9l-3-2h-5"/></svg>',
@@ -464,7 +481,56 @@ const MOOD = {
 const VTOP = {sunflower:-14,tomato:6,pepper:6,rosemary:22,fern:24,basil:34,kale:32,succulent:44};
 const POTS = ['#C96B4B','#3D7EA6','#D99A1C','#8A68AB','#D2596C','#4F8F74'];
 const LEVELS = [['Seedling',0],['Sprout',250],['Gardener',750],['Grower',1500],['Master Farmer',3000]];
-const EARN = [['Answer a question',15],['Get an upvote on your answer',5],['Share a tip or post',10],['Log a garden task',10],['Help with a nearby alert',20],['Add and name a plant',20],['Set up a garden',50]];
+const EARN = [['Answer a question',15],['Get an upvote on your answer',5],['Share a tip or post',10],['Log a garden task',10],['Help with a nearby alert',20],['Add and name a plant',20],['Complete a soil test',20],['Set up a garden',50]];
+
+/* ---------- soil testing (sample data) ---------- */
+const SOIL_STEPS = [
+  ['Gather clean tools','A stainless or plastic trowel, a clean plastic bucket and a zip bag. Skip rusty, brass or galvanized tools. They throw off the metal readings.'],
+  ['Pick 8 to 10 spots in a zigzag','Spread them across the whole bed so one odd patch does not skew the result. For a single pot, take 3 or 4 spots.'],
+  ['Dig 15 cm down','Brush mulch and leaves aside first. Take a thin slice from the surface to 15 cm at each spot. That is where most roots feed.'],
+  ['Mix it all in the bucket','Break up clumps and pick out stones, roots and worms. The mix is your sample.'],
+  ['Air-dry overnight','Spread it on paper indoors. Do not use an oven or heater. Heat changes the nitrogen reading.'],
+  ['Bag two cups and label it','About 500 mL. Write the garden, bed, crop and date on the bag.'],
+];
+const SOIL_REF = {
+  ph:{label:'pH',unit:'',lo:6,hi:7,min:4.5,max:8.5,step:.1},
+  n:{label:'Nitrogen',unit:'ppm',lo:20,hi:40,min:0,max:60,step:1},
+  p:{label:'Phosphorus',unit:'ppm',lo:25,hi:50,min:0,max:100,step:1},
+  k:{label:'Potassium',unit:'ppm',lo:120,hi:200,min:0,max:300,step:1},
+  om:{label:'Organic matter',unit:'%',lo:4,hi:8,min:0,max:12,step:.1},
+  pb:{label:'Lead',unit:'ppm',lo:0,hi:100,min:0,max:400,step:1},
+};
+const SOIL_SAMPLE = {ph:7.6,n:12,p:68,k:150,om:3.1,pb:48};
+const LABS = [
+  {id:'l1',name:'Riverbend Soil Lab',km:2.4,days:5,price:38,how:'Drop-off, weekdays 9 to 5',tests:['Fertility','Heavy metals'],x:246,y:214},
+  {id:'l2',name:'Campus Soil and Plant Lab',km:4.1,days:10,price:25,how:'Drop-off or campus mail',tests:['Fertility','Heavy metals','Texture'],x:318,y:76},
+  {id:'l3',name:'Northgate Agri-Analytics',km:6.8,days:3,price:55,how:'Drop-off, same-day intake',tests:['Fertility','Heavy metals','Pathogens'],x:52,y:140},
+  {id:'l4',name:'GreenRoot Testing',km:null,days:8,price:42,how:'Mail-in kit with prepaid label',tests:['Fertility','Heavy metals'],x:null,y:null},
+];
+const AGROS = [
+  {id:'ag1',name:'Dr. Amara Nwosu',cred:'P.Ag., soil fertility',focus:'Urban and raised-bed vegetable soils',price:45,days:2},
+  {id:'ag2',name:'Miguel Ortega',cred:'P.Ag., horticulture',focus:'Community gardens and compost programs',price:30,days:3},
+  {id:'ag3',name:'Hannah Lindqvist',cred:'Certified Crop Adviser',focus:'Contaminated and reclaimed sites',price:60,days:1},
+];
+const soilName = k => k === 'ph' ? 'pH' : SOIL_REF[k].label.toLowerCase();
+function soilStatus(key, v){ const r = SOIL_REF[key]; return v < r.lo ? 'Low' : v > r.hi ? 'High' : 'Good'; }
+// Rule-based stand-in for the AI analysis: reads the numbers and returns findings and actions.
+function soilAnalyse(v, p){
+  const out = [], st = k => soilStatus(k, v[k]);
+  if (st('ph') === 'High') out.push([`pH is ${v.ph}, above the 6.0 to 7.0 most vegetables and herbs prefer. Iron and phosphorus get harder for roots to take up.`, 'Work in elemental sulphur or pine-bark compost this season and stop adding lime or wood ash. Retest in three months.']);
+  if (st('ph') === 'Low') out.push([`pH is ${v.ph}, more acidic than the 6.0 to 7.0 most vegetables and herbs prefer.`, 'Add garden lime in small amounts and retest in three months.']);
+  if (st('n') === 'Low') out.push([`Nitrogen is low at ${v.n} ppm. Expect pale lower leaves and slow growth.`, 'Side-dress with composted manure or blood meal now, and sow a legume cover crop when the bed is empty.']);
+  if (st('n') === 'High') out.push([`Nitrogen is high at ${v.n} ppm. Plants will make leaves at the expense of fruit.`, 'Pause nitrogen feeds until the next test.']);
+  if (st('p') === 'High') out.push([`Phosphorus is high at ${v.p} ppm, usually from years of compost or bloom fertilizer.`, 'Skip bone meal and bloom feeds. Choose a fertilizer with a low middle number.']);
+  if (st('p') === 'Low') out.push([`Phosphorus is low at ${v.p} ppm. Roots and flowers will be weak.`, 'Mix in bone meal or rock phosphate before the next planting.']);
+  if (st('k') === 'Low') out.push([`Potassium is low at ${v.k} ppm. Fruit quality and disease resistance suffer.`, 'Add sulphate of potash or kelp meal.']);
+  if (st('k') === 'High') out.push([`Potassium is high at ${v.k} ppm.`, 'Leave out potash and wood ash this year.']);
+  if (st('om') === 'Low') out.push([`Organic matter is ${v.om}%, on the thin side for a vegetable bed. The soil will dry out fast.`, 'Spread 3 to 5 cm of finished compost each spring and keep the bed mulched.']);
+  if (st('pb') === 'High') out.push([`Lead is ${v.pb} ppm, above this lab's garden guideline.`, 'Grow food in raised beds filled with clean soil, keep bare soil covered, wash hands and produce, and get an agronomist to review the report.']);
+  const good = Object.keys(SOIL_REF).filter(k => st(k) === 'Good').map(soilName);
+  const head = out.length ? `${out.length === 1 ? 'One thing' : out.length + ' things'} to fix for ${p.name}. Start with the first.` : `Nothing to fix. This soil suits ${p.name} well.`;
+  return {head, items:out, good};
+}
 
 /* ---------- live recognition settings ---------- */
 // Paste a Teachable Machine image model link here to load it for every viewer,
@@ -483,11 +549,11 @@ const S = {
   tab:'buddies',
   nav:{buddies:[],gardens:[],scan:[],community:[],profile:[]},
   sheet:null,
-  seg:{plant:'care',gardens:'mine',community:'feed',map:'all',sort:'hot'},
+  seg:{plant:'care',gardens:'mine',community:'feed',map:'all',sort:'hot',labsort:'near'},
   scan:{mode:'identify',sel:null,busy:null},
   cam:{src:'sample',photo:null,marks:[],n:0,blocked:false,tried:false},
   rec:{url:DEFAULT_MODEL_URL,status:'off',err:'',labels:[],map:{},cand:null,streak:0,misses:0,locked:null,dismissed:null},
-  mapSel:null, checks:{}, forumQ:'',
+  mapSel:null, checks:{}, forumQ:'', soil:{},
   user:{name:'Maya Chen',handle:'maya_grows',pts:860,xp:1445,answers:14,upvotes:63,tasks:27,
     history:[{n:15,why:'Answered a question about basil',when:'Yesterday'},{n:5,why:'Upvote from @dana_o',when:'Yesterday'},{n:10,why:'Watered Sunny',when:'Sunday'},{n:10,why:'Shared a tip',when:'Last week'}]},
   plants:[
@@ -849,6 +915,7 @@ function vPlant(id){
         <div class="meter"><span class="ic" style="background:var(--sun-soft);color:var(--sun-ink)">${I.sun}</span><div class="top"><span>Sunlight</span><span>${esc(p.sun)} · ${c.hours}</span></div><div class="bar"><i style="width:${p.sun === 'Full sun' ? 90 : p.sun === 'Part shade' ? 60 : 30}%;background:var(--sun)"></i></div></div>
         <div class="meter"><span class="ic" style="background:var(--leaf-soft);color:var(--leaf-ink)">${I.feed}</span><div class="top"><span>Soil and feed</span><span>${esc(p.soil)}</span></div><div class="sub" style="grid-column:2">${esc(p.fert)} · last fed ${whenText(p.fed)}</div></div>
         ${iss ? `<button class="row" data-a="diagnose:${p.id}"><span class="pill sick plain">${ISSUES[iss].name}</span><span class="grow sub">Tap to see how to fix it</span>${I.chev}</button>` : ''}
+        <button class="row" data-a="push:soil:${p.id}"><span class="avatar" style="border-radius:11px;width:28px;height:28px">${I.lab.replace('<svg','<svg width="16" height="16"')}</span><span class="grow"><span class="t">Soil test</span><br><span class="sub">${S.soil[p.id]?.vals ? `Tested · pH ${S.soil[p.id].vals.ph} · tap for the full report` : S.soil[p.id]?.status === 'sent' ? 'Sample is at the lab' : 'Learn to take a sample, find a lab, get it analysed'}</span></span>${I.chev}</button>
       </div>${p.note ? `<p class="banner" style="margin-top:10px">Supervisor note: ${esc(p.note)}</p>` : ''}</div>
       <div class="sec"><h2>How to look after ${esc(p.name)}</h2><div class="list">${c.steps.map((s, i) => {
         const done = S.checks[p.id + i];
@@ -872,6 +939,68 @@ function vPlant(id){
       <div>${pill(md)}</div><p class="sub">${c.latin} · ${esc(whereText(p))}</p></div>
     <div class="pad" style="margin-top:12px"><div class="seg" role="tablist"><button class="${seg === 'care' ? 'on' : ''}" data-a="seg:plant:care">Care</button><button class="${seg === 'forum' ? 'on' : ''}" data-a="seg:plant:forum">Forum</button></div></div>
     ${seg === 'care' ? care() : forum()}`;
+}
+
+const soilOf = id => S.soil[id] || (S.soil[id] = {step:'sample', checks:{}, lab:null, status:'none', vals:null, source:'', ai:null, agro:null, agroReply:false});
+const MAP_BASE = `<rect class="m-land" width="390" height="300"/><rect class="m-park" x="20" y="24" width="96" height="62" rx="16"/><rect class="m-park" x="276" y="150" width="96" height="70" rx="18"/><rect class="m-park" x="120" y="196" width="70" height="44" rx="14"/><path class="m-river" stroke-width="30" d="M-20 262C70 232 120 300 205 272S330 226 410 250"/><path class="m-road" stroke-width="9" d="M-10 118L400 104M210 -10L196 310"/><path class="m-road" stroke-width="5" d="M-10 52L400 40M-10 176L400 166M70 -10L60 240M300 -10L290 250M136 -10L128 220M356 -10L350 240"/>`;
+function vSoil(id){
+  const p = plant(id), so = soilOf(id), lab = LABS.find(l => l.id === so.lab);
+  let body = '';
+  if (so.step === 'sample'){
+    const done = SOIL_STEPS.filter((_, i) => so.checks[i]).length;
+    let dots = ''; [[26,38],[58,84],[90,38],[122,84],[154,38],[58,38],[122,38],[90,84]].forEach((d, i) => dots += `<circle cx="${d[0]}" cy="${d[1]}" r="7" fill="#F2B01E" stroke="#3A2218" stroke-width="1.5"/><text x="${d[0]}" y="${d[1] + 3.5}" text-anchor="middle" style="fill:#3A2218;font-size:9px">${i + 1}</text>`);
+    body = `<div class="soil-art"><svg viewBox="0 0 340 128" role="img" aria-label="Diagram: take eight samples in a zigzag across the bed, each 15 centimetres deep">
+        <rect x="8" y="16" width="164" height="90" rx="8" fill="#6B4A33"/><rect x="8" y="16" width="164" height="90" rx="8" fill="none" stroke="#A67C52" stroke-width="5"/>
+        <path d="M26 38L58 84L90 38L122 84L154 38" fill="none" stroke="#F2B01E" stroke-width="2" stroke-dasharray="4 4"/>${dots}
+        <text x="90" y="122" text-anchor="middle">Zigzag across the bed</text>
+        <rect x="204" y="34" width="124" height="72" fill="#6B4A33"/><rect x="204" y="28" width="124" height="8" fill="#6FAE55"/>
+        <path d="M222 36h22v50h-22z" fill="#8E6842" stroke="#F2B01E" stroke-width="2" stroke-dasharray="4 3"/>
+        <path d="M258 36v50M253 36h10M253 86h10" stroke="#fff" stroke-width="1.5"/><text x="268" y="65" style="fill:#fff">15 cm</text>
+        <path d="M233 4v20M226 18l7 8 7-8" fill="none" stroke="var(--ink-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="266" y="122" text-anchor="middle">Slice from surface to 15 cm</text></svg></div>
+      <div class="list">${SOIL_STEPS.map((st, i) => `<button class="step ${so.checks[i] ? 'done' : ''}" data-a="soilCheck:${id}:${i}" aria-pressed="${!!so.checks[i]}"><span class="num">${so.checks[i] ? I.check : i + 1}</span><span><span class="t">${st[0]}</span><br><span class="sub">${st[1]}</span></span></button>`).join('')}</div>
+      <p class="banner">City garden? Ask the lab for a heavy metals screen as well. Old paint and traffic can leave lead in urban soil.</p>
+      <p class="sub">Best time: before planting or after harvest, and not within a month of adding fertilizer or lime.</p>
+      <button class="btn block" data-a="soilStep:${id}:lab">${done === SOIL_STEPS.length ? 'Sample ready. Find a lab' : 'Next: find a lab'}</button>`;
+  } else if (so.step === 'lab'){
+    const sort = S.seg.labsort, labs = [...LABS].sort((a, b) => sort === 'fast' ? a.days - b.days : sort === 'cheap' ? a.price - b.price : (a.km ?? 99) - (b.km ?? 99));
+    const num = l => LABS.indexOf(l) + 1;
+    body = (so.lab ? `<div class="note"><p style="font-weight:700">${so.status === 'sent' ? `Sample is at ${esc(lab.name)}` : so.status === 'ready' ? `Results are back from ${esc(lab.name)}` : `Sending to ${esc(lab.name)}`}</p>
+        <p class="sub">${so.status === 'sent' ? `Results usually take ${lab.days} days. This demo delivers them in a few seconds<span class="dots3"></span>` : so.status === 'ready' ? 'Open the Results tab to read them.' : `${lab.how}. Write this code on the bag: OS-${id.toUpperCase().slice(0, 4)}-${lab.id.toUpperCase()}`}</p>
+        ${so.status === 'none' ? `<div class="btnrow" style="margin-top:10px"><button class="btn sm" data-a="soilSend:${id}">I have dropped it off</button><button class="btn ghost sm" data-a="soilLab:${id}:">Change lab</button></div>` : so.status === 'ready' ? `<div class="btnrow" style="margin-top:10px"><button class="btn sm" data-a="soilStep:${id}:results">See results</button></div>` : ''}</div>` : '')
+      + `<div class="chips">${[['near','Nearest'],['fast','Fastest'],['cheap','Cheapest']].map(c => `<button class="chip ${sort === c[0] ? 'on' : ''}" data-a="seg:labsort:${c[0]}">${c[1]}</button>`).join('')}</div>
+      <div class="map"><svg viewBox="0 0 390 300" role="img" aria-label="Map of soil labs near you">${MAP_BASE}
+        ${LABS.filter(l => l.x).map(l => `<circle cx="${l.x}" cy="${l.y}" r="${so.lab === l.id ? 16 : 13}" fill="var(--water)" stroke="var(--surface)" stroke-width="3"/><text x="${l.x}" y="${l.y + 4.5}" text-anchor="middle" style="fill:#fff;font:700 13px var(--body)">${num(l)}</text>`).join('')}
+        <circle cx="196" cy="160" r="15" fill="var(--leaf)" opacity=".2"/><circle cx="196" cy="160" r="7" fill="var(--leaf)" stroke="#fff" stroke-width="3"/></svg></div>
+      ${labs.map(l => `<div class="card" style="${so.lab === l.id ? 'border-color:var(--water);border-width:2px' : ''}"><div style="display:flex;gap:10px;align-items:flex-start"><span class="labnum">${num(l)}</span><div class="grow" style="flex:1;min-width:0"><h3 style="font-size:17px;line-height:1.2">${esc(l.name)}</h3><p class="sub">${l.km ? l.km + ' km away' : 'Mail-in'} · results in ${l.days} days · $${l.price}</p><p class="sub">${l.how}</p></div></div>
+        <div class="chips" style="margin:8px 0 10px">${l.tests.map(t => `<span class="fact">${t}</span>`).join('')}</div>
+        ${so.lab === l.id ? '<span class="pill thriving plain">Chosen lab</span>' : `<button class="btn ${so.lab ? 'ghost' : ''} sm" data-a="soilLab:${id}:${l.id}" ${so.status === 'sent' ? 'disabled' : ''}>Send my sample here</button>`}</div>`).join('')}
+      <p class="sub">Sample labs for the demo. The real app would list accredited labs near your location.</p>
+      <button class="btn ghost block" data-a="sheet:soilvals:${id}">I already have a report. Enter the numbers</button>`;
+  } else {
+    if (!so.vals) body = `<div class="card"><p style="font-weight:700">No results yet</p><p class="sub" style="margin:4px 0 12px">${so.status === 'sent' ? `Your sample is at ${esc(lab.name)}. Results appear here when the lab uploads them.` : 'Send a sample to a lab, or type in the numbers from a report you already have.'}</p><div class="btnrow"><button class="btn sm" data-a="soilStep:${id}:lab">Find a lab</button><button class="btn ghost sm" data-a="sheet:soilvals:${id}">Enter numbers</button></div></div>`;
+    else {
+      const an = so.ai === 'done' && soilAnalyse(so.vals, p), ag = AGROS.find(a => a.id === so.agro);
+      body = `<p class="sub">${esc(so.source)} · target ranges are this lab's guidelines for vegetable beds (sample data)</p>
+        <div class="list">${Object.entries(SOIL_REF).map(([k, r]) => { const v = so.vals[k], st = soilStatus(k, v), pos = x => Math.max(0, Math.min(100, (x - r.min) / (r.max - r.min) * 100));
+          return `<div class="srow"><span><span class="t" style="font-weight:600">${r.label}</span> <span class="sub">target ${k === 'pb' ? 'under ' + r.hi : r.lo + ' to ' + r.hi}${r.unit ? ' ' + r.unit : ''}</span></span><span style="display:flex;gap:8px;align-items:center"><b>${v}${r.unit === '%' ? '%' : ''}</b><span class="pill ${st === 'Good' ? 'thriving' : st === 'Low' ? 'wilting' : 'sick'} plain">${st}</span></span>
+            <div class="sbar"><span class="band" style="left:${pos(r.lo)}%;width:${pos(r.hi) - pos(r.lo)}%"></span><span class="dot" style="left:${pos(v)}%"></span></div></div>`; }).join('')}</div>
+        <button class="btn ghost sm" data-a="sheet:soilvals:${id}" style="align-self:flex-start">${I.pencil}Edit numbers</button>
+        <h2 style="font-size:20px;margin-top:8px">What does it mean?</h2>
+        ${so.ai === 'done' ? `<div class="note"><p class="tag">AI analysis</p><p style="font-weight:700;margin:4px 0 8px">${esc(an.head)}</p>
+            ${an.items.length ? `<ol class="fix">${an.items.map(it => `<li><span>${esc(it[0])}<br><b>${esc(it[1])}</b></span></li>`).join('')}</ol>` : ''}
+            ${an.good.length ? `<p class="sub" style="margin-top:8px">In range: ${an.good.join(', ')}.</p>` : ''}
+            <p class="sub" style="margin-top:8px">In this demo the analysis comes from built-in rules, not a live AI model. Check big changes with an agronomist.</p></div>`
+          : `<button class="btn block" data-a="soilAI:${id}" ${so.ai === 'loading' ? 'disabled' : ''}>${so.ai === 'loading' ? 'Reading your results<span class="dots3"></span>' : 'Explain it with AI'}</button>`}
+        ${ag ? `<div class="note" style="border-left-color:var(--sun)"><p class="tag show">Agronomist review</p><p style="font-weight:700;margin:4px 0">${esc(ag.name)} <span class="sub">${ag.cred}</span></p>
+            ${so.agroReply ? `<p>I have read the report for ${esc(p.name)}. ${soilAnalyse(so.vals, p).items.length ? 'I agree with the main findings. Correct the pH and nutrients gradually: one light amendment now, then retest in spring before adding more. Raised beds swing quickly, so small doses are safer than one big fix.' : 'The numbers look healthy. Keep adding compost each spring and retest in a year.'} ${so.vals.pb > 100 ? 'Because lead is above the guideline, please do not grow leafy or root crops in this soil until we talk.' : 'Lead is within the guideline, so the bed is fine for food crops.'} Message me if you want a planting plan.</p><p class="sub" style="margin-top:6px">Sample reply for the demo.</p>`
+              : `<p class="sub">Review requested. Usually replies within ${plural(ag.days, 'day')}. This demo replies in a few seconds<span class="dots3"></span></p>`}</div>`
+          : `<h3 style="font-size:17px;margin-top:6px">Or ask an agronomist</h3><div class="list">${AGROS.map(a => `<div class="row"><span class="avatar">${initials(a.name.replace('Dr. ', ''))}</span><span class="grow"><span class="t">${esc(a.name)}</span><br><span class="sub">${a.cred} · ${a.focus}</span><br><span class="sub">Replies in ${plural(a.days, 'day')}</span></span><button class="btn sm" data-a="soilAgro:${id}:${a.id}">$${a.price}</button></div>`).join('')}</div><p class="sub">Sample agronomists for the demo. No payment is taken.</p>`}`;
+    }
+  }
+  return navBar('Soil test') + `<div class="sec" style="margin-top:14px"><div style="display:flex;gap:12px;align-items:center">${plantSVG(p, 56)}<div><h1 style="font-size:26px;font-weight:800;line-height:1.1">Soil test for ${esc(p.name)}</h1><p class="sub">${esc(whereText(p))}</p></div></div>
+      <div class="seg" style="margin-top:12px">${[['sample','1 Sample'],['lab','2 Lab'],['results','3 Results']].map(t => `<button class="${so.step === t[0] ? 'on' : ''}" data-a="soilStep:${id}:${t[0]}">${t[1]}</button>`).join('')}</div></div>
+    <div class="sec" style="margin-top:14px"><div class="stack">${body}</div></div>`;
 }
 
 function vQuestion(t){
@@ -914,6 +1043,14 @@ function vScan(){
     <div class="flash" id="flash"></div></div>`;
 }
 
+function soilResults(id, vals, source){
+  const so = soilOf(id), p = plant(id), first = !so.vals;
+  so.vals = vals; so.source = source; so.status = 'ready'; so.ai = null; so.agro = null; so.agroReply = false; so.step = 'results';
+  const flags = Object.keys(SOIL_REF).filter(k => soilStatus(k, vals[k]) !== 'Good').map(k => `${soilStatus(k, vals[k]).toLowerCase()} ${soilName(k)}`);
+  S.log.unshift({g:p.where, plant:id, action:'Soil tested', who:'You', days:0, note:`pH ${vals.ph}. ${flags.length ? 'Flagged: ' + flags.join(', ') + '.' : 'Everything in range.'}`});
+  const t = cur(); if (t?.v === 'soil' && t.id === id){ delete scrollMem[viewKey()]; } if (!S.sheet) render();
+  if (first) earn(20, `Soil test for ${p.name}`); else toast(`Results updated for ${p.name}`);
+}
 function logRow(l){
   const p = l.plant && plant(l.plant), water = l.action === 'Watered';
   const latest = water && p && S.log.find(x => x.plant === l.plant && x.action === 'Watered') === l;
@@ -1080,6 +1217,9 @@ function sheetHTML(){
         ${S.rec.status === 'error' ? `<p class="banner" style="background:var(--alert-soft);color:var(--alert-ink)">${esc(S.rec.err)}</p>` : ''}
         ${S.rec.status === 'ready' ? `<p class="sub">Model loaded with ${(S.rec.labels.length + ' classes')}. Choose which buddy each one opens.</p>${S.rec.labels.map((l, i) => `<label class="fld"><span>When it sees “${esc(l)}”</span><select id="rec-map-${i}" data-rec="${i}"><option value="">Ignore it</option>${recPool().map(p => `<option value="${p.id}" ${S.rec.map[l] === p.id ? 'selected' : ''}>${esc(p.name)} (${CARE[p.kind].species})</option>`).join('')}</select></label>`).join('')}<button class="btn ghost sm" data-a="recOff">Turn recognition off</button>` : ''}</div>
       <p class="sub">${S.rec.status === 'ready' ? 'Care details and diagnoses are still sample data for the buddy you link.' : 'Without a model, plant names and diagnoses are sample data and the brackets stay where you tap.'}</p>`]; }
+    case 'soilvals': { const so = soilOf(sh.a), v = so.vals || {}; return ['Enter lab results', `<form class="form" data-f="soilVals:${sh.a}"><p class="sub">Copy the numbers from your lab report. Leave a box empty if the report does not include it.</p>
+        <div class="fgrid">${Object.entries(SOIL_REF).map(([k, r]) => `<label class="fld"><span>${r.label}${r.unit ? ' (' + r.unit + ')' : ''}</span><input id="soil-${k}" type="number" name="${k}" step="${r.step}" min="0" inputmode="decimal" value="${v[k] ?? ''}" placeholder="${SOIL_SAMPLE[k]}"></label>`).join('')}</div>
+        <button class="btn block" type="submit">Save results</button></form>`]; }
     case 'dx': return dxSheet(sh);
     case 'setup': return setupSheet(sh);
     case 'tour': return ['Demo guide', `<p class="sub">Everything here runs on sample data. Nothing is sent anywhere, and it resets when you reload.</p><div class="list">${[
@@ -1089,6 +1229,7 @@ function sheetHTML(){
       ['Diagnose a problem and see products','Scan tab, Diagnose mode. Tap Kale-b.','go:scan:diagnose'],
       ['Name a new plant','Scan tab. Tap the bell pepper.','go:scan'],
       ['Plant moods, care steps and forum','Buddies tab. Open any plant.','go:buddies'],
+      ['Soil test: sampling guide, labs and analysis','Buddies tab. Open a plant, then Soil test.','goSoil'],
       ['Shared garden log and jobs','Gardens tab. Open Riverside.','go:gardens:mine'],
       ['Supervisor setup with an AR scan','Gardens tab. Set up a new garden.','setup'],
       ['Map of nearby plant alerts','Gardens tab, Map.','go:gardens:map'],
@@ -1140,7 +1281,7 @@ const scrollMem = {}; let lastKey = '';
 const viewKey = () => { const t = cur(); return S.tab + (t ? `/${t.v}/${t.id}/${t.x || ''}` : ''); };
 function viewHTML(){
   const t = cur();
-  if (t) switch (t.v){ case 'plant': return vPlant(t.id); case 'q': return vQuestion(t); case 'garden': return vGarden(t.id); case 'post': return vPost(t.id); }
+  if (t) switch (t.v){ case 'plant': return vPlant(t.id); case 'q': return vQuestion(t); case 'garden': return vGarden(t.id); case 'post': return vPost(t.id); case 'soil': return vSoil(t.id); }
   return {buddies:vBuddies, gardens:vGardens, scan:vScan, community:vCommunity, profile:vProfile}[S.tab]();
 }
 function render(enter){
@@ -1200,6 +1341,17 @@ const A = {
     render(); earn(10, `Watered ${p.name}`);
   },
   feed(id){ const p = plant(id); p.fed = 0; S.log.unshift({g:p.where, plant:id, action:'Fertilized', who:'You', days:0, note:''}); S.user.tasks++; render(); earn(10, `Fed ${p.name}`); },
+  goSoil(){ S.tab = 'buddies'; S.sheet = null; S.seg.plant = 'care'; S.nav.buddies = [{v:'plant', id:'bob'}, {v:'soil', id:'bob'}]; render(true); },
+  soilStep(id, step){ soilOf(id).step = step; delete scrollMem[viewKey()]; render(); $('#screen').scrollTop = 0; },
+  soilCheck(id, i){ const so = soilOf(id); so.checks[i] = !so.checks[i]; render(); },
+  soilLab(id, lab){ const so = soilOf(id); if (so.status === 'sent') return; so.lab = lab || null; if (so.status === 'ready' && lab) so.status = 'none'; render(); if (lab) $('#screen').scrollTop = 0; },
+  soilSend(id){
+    const so = soilOf(id), p = plant(id); so.status = 'sent'; render(); toast(`Sample for ${p.name} logged as dropped off`);
+    setTimeout(() => { if (so.status === 'sent') soilResults(id, {...SOIL_SAMPLE}, `From ${LABS.find(l => l.id === so.lab).name}, today`); }, 3000);
+  },
+  soilAI(id){ const so = soilOf(id); so.ai = 'loading'; render(); setTimeout(() => { so.ai = 'done'; const t = cur(); if (t?.v === 'soil' && t.id === id && !S.sheet) render(); }, 1500); },
+  soilAgro(id, aid){ const so = soilOf(id); so.agro = aid; so.agroReply = false; render(); toast('Review requested');
+    setTimeout(() => { so.agroReply = true; toast(`${AGROS.find(a => a.id === aid).name} replied about ${plant(id).name}`); const t = cur(); if (t?.v === 'soil' && t.id === id && !S.sheet) render(); }, 3500); },
   check(id, i){ S.checks[id + i] = !S.checks[id + i]; render(); },
   diagnose(id){ openSheet('dx', id, {scanning:true}); setTimeout(() => { if (S.sheet?.type === 'dx' && S.sheet.a === id){ S.sheet.scanning = false; renderSheet(); } }, 1500); },
   treated(id){ const p = plant(id), n = ISSUES[p.issue].name.toLowerCase(); p.issue = null; S.log.unshift({g:p.where, plant:id, action:'Treated for ' + n, who:'You', days:0, note:''}); S.user.tasks++; S.sheet = null; render(); earn(15, `Treated ${p.name}`); },
@@ -1291,6 +1443,11 @@ const A = {
   },
 };
 const F = {
+  soilVals(id, fd){
+    const so = soilOf(id), vals = {};
+    for (const k of Object.keys(SOIL_REF)){ const x = parseFloat(fd.get(k)); vals[k] = Number.isFinite(x) && x >= 0 ? x : (so.vals?.[k] ?? SOIL_SAMPLE[k]); }
+    S.sheet = null; soilResults(id, vals, 'Entered by you, today');
+  },
   recLoad(fd){ recLoad(fd.get('url') || '').then(recKick); },
   ask(kind, fd){ S.forum[kind].unshift({id:'q' + Date.now(), q:fd.get('text').trim(), by:S.user.handle, votes:1, voted:true, answers:[]}); S.sheet = null; render(); toast('Question posted to the forum'); },
   answer(kind, qid, fd){

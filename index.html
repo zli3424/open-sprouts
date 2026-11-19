@@ -203,7 +203,7 @@ svg{display:block}
 .answer{display:flex;gap:10px;padding:14px;border-top:1px solid var(--line)}
 .answer:first-child{border-top:0}
 .answer.mine{background:var(--leaf-soft)}
-textarea,input[type=text],input[type=number],select{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:44px}
+textarea,input[type=text],input[type=number],input[type=date],select{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:44px}
 textarea{min-height:88px;resize:vertical}
 .fld{display:flex;flex-direction:column;gap:6px}
 .fld>span{font-size:13px;font-weight:600;color:var(--ink-2)}
@@ -336,6 +336,42 @@ textarea{min-height:88px;resize:vertical}
 @keyframes dots3{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
 .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 
+/* Initiatives */
+.ibar{position:relative;height:12px;border-radius:6px;background:var(--surface-2);margin:10px 0 6px}
+.ibar>i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:var(--leaf);transition:width .5s ease}
+.ibar.done>i{background:var(--sun)}
+.ibar .ms{position:absolute;top:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:var(--surface);border:3px solid var(--line)}
+.ibar .ms.on{border-color:var(--surface);background:var(--sun)}
+.ibar.sm{height:7px;margin:2px 0 0}
+.icard{display:block;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:14px}
+.icard h3{font-size:19px;font-weight:700;line-height:1.15}
+.inum{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-variant-numeric:tabular-nums}
+.inum b{font:800 22px var(--display)}
+.ihero .inum b{font-size:32px}
+.optrow{display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;border-top:1px solid var(--line)}
+.optrow:first-child{border-top:0}
+.optrow .radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);flex:none;display:grid;place-items:center}
+.optrow.on{background:var(--leaf-soft)}
+.optrow.on .radio{border-color:var(--leaf)}
+.optrow.on .radio::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--leaf)}
+.optrow[disabled]{opacity:.45;cursor:default}
+.erow{display:grid;grid-template-columns:1fr 76px 36px;gap:8px;align-items:center}
+.erow.two{grid-template-columns:1fr 1fr 36px}
+.erow.one{grid-template-columns:1fr 36px}
+.erow.rw{grid-template-columns:96px 1fr 36px}
+.xbtn{width:36px;height:36px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;color:var(--ink-2)}
+.xbtn svg{width:14px;height:14px}
+.xbtn[disabled]{opacity:.35;cursor:default}
+.fsec{display:flex;flex-direction:column;gap:8px}
+.fsec>h3{font-size:17px;font-weight:700;display:flex;gap:8px;align-items:baseline}
+.fsec>h3 small{font:500 13px var(--body);color:var(--ink-2)}
+.total{display:flex;justify-content:space-between;align-items:center;background:var(--leaf-soft);color:var(--leaf-ink);border-radius:12px;padding:10px 12px;font-weight:700;font-variant-numeric:tabular-nums}
+.ico{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;flex:none;background:var(--leaf-soft);color:var(--leaf-ink)}
+.ico svg{width:17px;height:17px}
+.ico.w{background:var(--water-soft);color:var(--water-ink)}
+.ico.s{background:var(--sun-soft);color:var(--sun-ink)}
+.ico.off{background:var(--surface-2);color:var(--ink-2)}
+
 /* Sheets and toasts */
 #sheet-root{position:absolute;inset:0;pointer-events:none;z-index:10}
 #sheet-root>*{pointer-events:auto}
@@ -432,6 +468,8 @@ const I = {
   scanIc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg>',
   tool:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 6l4 4M4 20l9-9M13 7l2-3 5 5-3 2z"/></svg>',
   lab:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3M7.5 15h9"/></svg>',
+  mail:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M4 7l8 6 8-6"/></svg>',
+  gift:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="1.5"/><path d="M3 7h18v3H3zM12 7v13M12 7C10.5 4 7 3.5 7 5.8 7 7 10 7 12 7zM12 7c1.5-3 5-3.5 5-1.2C17 7 14 7 12 7z"/></svg>',
   tBuddies:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14V8M12 9c0-3 2-5 5-5 0 3-2 5-5 5zM12 11c0-2-2-4-5-4 0 2 2 4 5 4z"/><path d="M6 14h12l-1.5 6h-9z"/></svg>',
   tGardens:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>',
   tCommunity:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h11a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H9l-4 3v-3H4z"/><path d="M17 9h3v9l-3-2h-5"/></svg>',
@@ -481,7 +519,7 @@ const MOOD = {
 const VTOP = {sunflower:-14,tomato:6,pepper:6,rosemary:22,fern:24,basil:34,kale:32,succulent:44};
 const POTS = ['#C96B4B','#3D7EA6','#D99A1C','#8A68AB','#D2596C','#4F8F74'];
 const LEVELS = [['Seedling',0],['Sprout',250],['Gardener',750],['Grower',1500],['Master Farmer',3000]];
-const EARN = [['Answer a question',15],['Get an upvote on your answer',5],['Share a tip or post',10],['Log a garden task',10],['Help with a nearby alert',20],['Add and name a plant',20],['Complete a soil test',20],['Set up a garden',50]];
+const EARN = [['Answer a question',15],['Get an upvote on your answer',5],['Share a tip or post',10],['Log a garden task',10],['Help with a nearby alert',20],['Add and name a plant',20],['Complete a soil test',20],['Contribute to an initiative, plus 2 per item',10],['Sign up to help an initiative',10],['Help an initiative reach a goal',25],['Start an initiative',30],['Set up a garden',50]];
 
 /* ---------- soil testing (sample data) ---------- */
 const SOIL_STEPS = [
@@ -532,6 +570,53 @@ function soilAnalyse(v, p){
   return {head, items:out, good};
 }
 
+/* ---------- initiatives (sample data) ---------- */
+const dAhead = d => { const x = new Date(NOW); x.setHours(12, 0, 0, 0); x.setDate(x.getDate() + d); return x; };
+const ymd = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const fromYmd = v => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || ''); return m ? new Date(+m[1], +m[2] - 1, +m[3], 12) : null; };
+const UNITS = ['plants','potted plants','seedlings','seed packets','trees','kg of produce'];
+const iNeed = i => i.items.reduce((a, x) => a + x.need, 0);
+const iGot = i => i.items.reduce((a, x) => a + Math.min(x.got, x.need), 0);
+const iPct = i => iNeed(i) ? iGot(i) / iNeed(i) * 100 : 0;
+const iGoals = i => [...new Set([...i.rewards.map(r => +r.pct), 100])].sort((a, b) => a - b);
+const givePts = q => Math.min(40, 10 + 2 * q);
+function iLeft(i){ const d = Math.round((i.ends - dAhead(0)) / 86400000); return d < 0 ? 'Ended' : d === 0 ? 'Ends today' : d === 1 ? '1 day left' : `${d} days left`; }
+const iEnds = i => `${MONTHS[i.ends.getMonth()]} ${i.ends.getDate()}`;
+function ibar(i){
+  const p = iPct(i);
+  return `<div class="ibar ${p >= 100 ? 'done' : ''}" role="progressbar" aria-label="Progress toward the goal" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.floor(p)}"><i style="width:${p}%"></i>${iGoals(i).filter(g => g < 100).map(g => `<span class="ms ${p >= g ? 'on' : ''}" style="left:${g}%"></span>`).join('')}</div>`;
+}
+const INITS = [
+  {id:'i1', title:'Windowsill herbs for Northgate seniors', by:'Ruth Abara', handle:'ruth_a', org:"Northgate Seniors' Garden", unit:'potted plants', ends:dAhead(23),
+    about:'Residents cannot reach the outdoor beds over winter. A pot of herbs on every windowsill keeps them growing, cooking and chatting until spring.',
+    items:[{name:'Basil',need:20,got:10},{name:'Rosemary',need:15,got:7},{name:'Mint',need:15,got:3},{name:'Parsley',need:10,got:7}],
+    drop:[{name:"Northgate Seniors' Garden, front office",detail:'Weekdays 10 to 4'},{name:'Riverside Community Garden shed',detail:'Saturdays 9 to 12'}], ship:'',
+    ways:[{text:'Deliver pots to residents on Saturday morning',n:6,joined:false},{text:'Donate small pots and saucers',n:3,joined:false}],
+    rewards:[{pct:25,text:'Thank-you card from the residents'},{pct:50,text:'Shout-out in the Northgate newsletter'},{pct:100,text:'Invite to the herb tea afternoon'}],
+    supporters:14, yours:3, mine:false, recent:[['priya_plants','4 Basil','2 h ago'],['maya_grows','3 Basil','Yesterday'],['tom_k','2 Rosemary','2 d ago']]},
+  {id:'i2', title:'Spring seed library', by:'Priya Raman', handle:'priya_plants', org:'Riverside Seed Library', unit:'seed packets', ends:dAhead(73),
+    about:'Free seeds for anyone in the neighbourhood come spring. Saved seed from your own garden is perfect, as long as it is labelled with the variety and year.',
+    items:[{name:'Tomato',need:80,got:71},{name:'Bean',need:60,got:52},{name:'Lettuce',need:60,got:49},{name:'Squash',need:40,got:24}],
+    drop:[{name:'Riverside Branch Library, front desk',detail:'During library hours'}], ship:'Riverside Seed Library, 214 River Trail Road',
+    ways:[{text:'Help sort and label packets on Thursday evenings',n:9,joined:false}],
+    rewards:[{pct:50,text:'First pick of the spring seeds'},{pct:75,text:'Name a variety in the seed catalogue'},{pct:100,text:'Seed library tote bag'}],
+    supporters:37, yours:0, mine:false, recent:[['dana_o','10 Bean','5 h ago'],['ana_s','6 Lettuce','Yesterday'],['jin_p','12 Tomato','3 d ago']]},
+  {id:'i3', title:'Fruit trees for the Maple Street schoolyard', by:'Leo Martins', handle:'leo_grows', org:'Maple Street Rooftop Plots', unit:'trees', ends:dAhead(40),
+    about:'The school wants a small orchard where students can learn to prune, pick and share. Bare-root trees are planted on a spring planting day.',
+    items:[{name:'Apple',need:6,got:1},{name:'Pear',need:4,got:1},{name:'Serviceberry',need:10,got:1}],
+    drop:[{name:'Maple Street Rooftop Plots, ground-floor gate',detail:'Sundays 1 to 4'}], ship:'Maple Street Public School, attn. Green Team',
+    ways:[{text:'Dig planting holes on planting day in April',n:11,joined:false},{text:'Donate mulch or tree guards',n:2,joined:false}],
+    rewards:[{pct:25,text:'Your name on the orchard sign'},{pct:100,text:'Invite to the planting day picnic'}],
+    supporters:3, yours:0, mine:false, recent:[['omar_h','1 Apple','4 d ago'],['noor_a','1 Serviceberry','6 d ago']]},
+  {id:'i4', title:'Greenhouse starts for the community fridge', by:'Sam Idowu', handle:'sam_seeds', org:'Campus Greenhouse Co-op', unit:'seedlings', ends:dAhead(5),
+    about:'Fast greens grown in the campus greenhouse and handed out through the Maple Street community fridge all winter.',
+    items:[{name:'Kale',need:40,got:40},{name:'Lettuce',need:40,got:40},{name:'Bok choy',need:20,got:20}],
+    drop:[{name:'Campus Greenhouse Co-op',detail:'Weekdays 8 to 6'}], ship:'',
+    ways:[{text:'Water the trays over the holiday break',n:4,joined:false}],
+    rewards:[{pct:100,text:'Greenhouse open house and pizza'}],
+    supporters:22, yours:0, mine:false, recent:[['li_wei','12 Kale','Yesterday'],['sam_seeds','20 Bok choy','2 d ago']]},
+];
+
 /* ---------- live recognition settings ---------- */
 // Paste a Teachable Machine image model link here to load it for every viewer,
 // or leave it empty and paste the link in the app under Scan > camera source.
@@ -549,11 +634,11 @@ const S = {
   tab:'buddies',
   nav:{buddies:[],gardens:[],scan:[],community:[],profile:[]},
   sheet:null,
-  seg:{plant:'care',gardens:'mine',community:'feed',map:'all',sort:'hot',labsort:'near'},
+  seg:{plant:'care',gardens:'mine',community:'feed',map:'all',sort:'hot',labsort:'near',initf:'active'},
   scan:{mode:'identify',sel:null,busy:null},
   cam:{src:'sample',photo:null,marks:[],n:0,blocked:false,tried:false},
   rec:{url:DEFAULT_MODEL_URL,status:'off',err:'',labels:[],map:{},cand:null,streak:0,misses:0,locked:null,dismissed:null},
-  mapSel:null, checks:{}, forumQ:'', soil:{},
+  mapSel:null, checks:{}, forumQ:'', soil:{}, inits:INITS,
   user:{name:'Maya Chen',handle:'maya_grows',pts:860,xp:1445,answers:14,upvotes:63,tasks:27,
     history:[{n:15,why:'Answered a question about basil',when:'Yesterday'},{n:5,why:'Upvote from @dana_o',when:'Yesterday'},{n:10,why:'Watered Sunny',when:'Sunday'},{n:10,why:'Shared a tip',when:'Last week'}]},
   plants:[
@@ -1051,6 +1136,31 @@ function soilResults(id, vals, source){
   const t = cur(); if (t?.v === 'soil' && t.id === id){ delete scrollMem[viewKey()]; } if (!S.sheet) render();
   if (first) earn(20, `Soil test for ${p.name}`); else toast(`Results updated for ${p.name}`);
 }
+const niTotal = () => S.sheet.items.reduce((a, x) => a + Math.max(0, parseInt(x.need) || 0), 0);
+function iApply(i, idx, qty, handle){
+  const it = i.items[idx], before = iPct(i);
+  qty = Math.max(0, Math.min(qty, it.need - it.got)); if (!qty) return [];
+  it.got += qty; i.recent.unshift([handle, `${qty} ${it.name}`, 'Just now']);
+  const after = iPct(i);
+  return iGoals(i).filter(g => g > before && g <= after + 1e-9);
+}
+function iCelebrate(i, goals, owner){
+  goals.forEach((g, k) => setTimeout(() => {
+    const r = i.rewards.find(x => +x.pct === g);
+    earn(g === 100 ? 50 : 25, owner ? (g === 100 ? 'Your initiative reached its goal' : `Your initiative reached ${g}%`) : (g === 100 ? 'You helped reach the final goal' : `You helped reach the ${g}% goal`));
+    if (r) setTimeout(() => toast(`Reward unlocked: ${r.text}`, 'lvl'), 900);
+    if (!S.sheet) render();
+  }, 1100 + k * 2200));
+}
+function iNeighbour(id){
+  const i = S.inits.find(x => x.id === id); if (!i) return;
+  const idx = i.items.findIndex(x => x.got < x.need); if (idx < 0) return;
+  const it = i.items[idx], qty = Math.max(1, Math.ceil(iNeed(i) * .3));
+  const goals = iApply(i, idx, qty, 'priya_plants'); i.supporters++;
+  toast(`@priya_plants pledged ${it.got > 0 ? i.recent[0][1] : qty + ' ' + it.name} to your initiative`);
+  if (!S.sheet) render();
+  iCelebrate(i, goals, true);
+}
 function logRow(l){
   const p = l.plant && plant(l.plant), water = l.action === 'Watered';
   const latest = water && p && S.log.find(x => x.plant === l.plant && x.action === 'Watered') === l;
@@ -1153,12 +1263,47 @@ function vCommunity(){
     const ps = [...S.posts].sort((a, b) => sort === 'new' ? a.age - b.age : sort === 'top' ? b.votes - a.votes : (b.votes / (b.age + 8)) - (a.votes / (a.age + 8)));
     body = `<div class="pad stack"><div class="chips">${[['hot','Hot'],['new','New'],['top','Top']].map(c => `<button class="chip ${sort === c[0] ? 'on' : ''}" data-a="seg:sort:${c[0]}">${c[1]}</button>`).join('')}</div>
       <div class="list">${ps.map(p => `<div class="post">${voteCol(p)}<button data-a="push:post:${p.id}" style="flex:1;min-width:0"><span class="tag ${tagClass(p.tag)}">${p.tag}</span><h3>${esc(p.title)}</h3><span class="meta">@${p.by}<span class="lvl">${p.lvl}</span>${ageText(p.age)} · ${plural(p.comments.length, 'comment')}</span></button></div>`).join('')}</div></div>`;
+  } else if (seg === 'init'){
+    body = vInits();
   } else {
     const rows = [...S.leaders.map(l => ({name:l[0], h:l[1], xp:l[2]})), {name:S.user.name, h:S.user.handle, xp:S.user.xp, me:true}].sort((a, b) => b.xp - a.xp);
     body = `<div class="pad stack"><p class="sub">Ranked by points earned from answers, tips and garden work this season.</p><div class="list">${rows.map((r, i) => `<div class="row ${r.me ? 'me' : ''}"><span class="rank">${i + 1}</span><span class="avatar ${r.me ? 'me' : ''}">${initials(r.name)}</span><span class="grow"><span class="t">${esc(r.name)}${r.me ? ' (you)' : ''}</span><br><span class="sub">${level(r.xp).name}</span></span><span class="pts">${r.xp.toLocaleString()}</span></div>`).join('')}</div></div>`;
   }
-  return `<header class="lt"><div><p class="eyebrow">Tips, advice and questions</p><h1>Community</h1></div><button class="iconbtn" data-a="sheet:newpost" aria-label="Write a post">${I.plus}</button></header>
-    <div class="pad" style="margin-bottom:14px"><div class="seg"><button class="${seg === 'feed' ? 'on' : ''}" data-a="seg:community:feed">Feed</button><button class="${seg === 'board' ? 'on' : ''}" data-a="seg:community:board">Leaderboard</button></div></div>${body}`;
+  return `<header class="lt"><div><p class="eyebrow">${seg === 'init' ? 'Plants and crops for good causes' : 'Tips, advice and questions'}</p><h1>Community</h1></div><button class="iconbtn" data-a="${seg === 'init' ? 'newInit' : 'sheet:newpost'}" aria-label="${seg === 'init' ? 'Start an initiative' : 'Write a post'}">${I.plus}</button></header>
+    <div class="pad" style="margin-bottom:14px"><div class="seg">${[['feed','Feed'],['init','Initiatives'],['board','Leaderboard']].map(t => `<button class="${seg === t[0] ? 'on' : ''}" data-a="seg:community:${t[0]}">${t[1]}</button>`).join('')}</div></div>${body}`;
+}
+function vInits(){
+  const f = S.seg.initf, yours = i => i.mine || i.yours > 0 || i.ways.some(w => w.joined);
+  const list = S.inits.filter(i => f === 'done' ? iPct(i) >= 100 : f === 'yours' ? yours(i) : iPct(i) < 100);
+  const card = i => { const p = iPct(i), open = i.items.filter(x => x.got < x.need);
+    return `<button class="icard" data-a="push:init:${i.id}"><span class="gtop"><span class="tag">${esc(i.org)}</span>${p >= 100 ? '<span class="pill wilting plain">Goal reached</span>' : `<span class="sub" style="white-space:nowrap">${iLeft(i)}</span>`}</span>
+      <h3 style="margin:4px 0 8px">${esc(i.title)}</h3>
+      <span class="inum"><span><b>${iGot(i)}</b> <span class="sub">of ${iNeed(i)} ${esc(i.unit)}</span></span><span class="sub" style="font-weight:700">${Math.floor(p)}%</span></span>${ibar(i)}
+      <span class="chips">${open.slice(0, 3).map(x => `<span class="fact">${esc(x.name)} · ${x.need - x.got} needed</span>`).join('')}${i.mine ? '<span class="pill thriving plain">You started this</span>' : i.yours ? `<span class="pill thriving plain">You gave ${i.yours}</span>` : ''}</span></button>`; };
+  return `<div class="pad stack"><button class="btn block" data-a="newInit">${I.plus}Start an initiative<span class="pts">+30</span></button>
+    <div class="chips">${[['active','Active'],['yours','Yours'],['done','Completed']].map(c => `<button class="chip ${f === c[0] ? 'on' : ''}" data-a="seg:initf:${c[0]}">${c[1]}</button>`).join('')}</div>
+    ${list.length ? list.map(card).join('') : `<p class="sub">${f === 'yours' ? 'You have not joined an initiative yet. Contribute to one, sign up to help, or start your own.' : 'Nothing here yet.'}</p>`}
+    <p class="sub">Initiatives, organisers and locations are sample data.</p></div>`;
+}
+function vInit(id){
+  const i = S.inits.find(x => x.id === id), p = iPct(i), done = p >= 100, need = iNeed(i), got = iGot(i);
+  return navBar('Initiative') + `<div class="sec" style="margin-top:14px"><p class="tag">${esc(i.org)}</p>
+      <h1 style="font-size:28px;font-weight:800;line-height:1.1;margin:4px 0 6px">${esc(i.title)}</h1>
+      <p class="meta">Organised by ${i.mine ? 'you' : esc(i.by)} · ${done ? 'Goal reached' : iLeft(i)} · ends ${iEnds(i)}</p>
+      <p style="margin-top:10px">${esc(i.about)}</p>
+      ${i.mine ? '<p class="banner" style="margin-top:10px">You started this initiative. Neighbours can find it under Community, Initiatives.</p>' : ''}</div>
+    <div class="sec"><div class="card ihero">
+      <div class="inum"><span><b>${got}</b> <span class="sub">of ${need} ${esc(i.unit)} pledged</span></span><span style="font:800 20px var(--display)">${Math.floor(p)}%</span></div>
+      ${ibar(i)}<p class="sub">${plural(i.supporters, 'supporter')}${i.yours ? ` · you gave ${i.yours}` : ''}</p>
+      <div class="btnrow" style="margin-top:12px">${done ? `<button class="btn soft" disabled>${I.check}Goal reached. Thank you</button>` : `<button class="btn" data-a="give:${i.id}">Contribute</button>`}</div></div></div>
+    <div class="sec"><h2>What they need</h2><div class="list">${i.items.map((x, k) => { const left = x.need - x.got;
+      return `<div class="row" style="flex-wrap:wrap;row-gap:8px"><span class="ico">${I.feed}</span><span class="grow"><span class="t">${esc(x.name)}</span><br><span class="sub">${x.got} of ${x.need} ${esc(i.unit)}${left > 0 ? ` · ${left} more needed` : ''}</span></span>${left > 0 ? `<button class="btn ghost sm" data-a="give:${i.id}:${k}">Give</button>` : '<span class="pill thriving plain">Covered</span>'}<div class="ibar sm" style="flex-basis:100%"><i style="width:${Math.min(100, x.got / x.need * 100)}%"></i></div></div>`; }).join('')}</div></div>
+    <div class="sec"><h2>Where to bring it</h2><div class="list">${i.drop.map(d => `<div class="row"><span class="ico w">${I.tGardens}</span><span class="grow"><span class="t">${esc(d.name)}</span>${d.detail ? `<br><span class="sub">${esc(d.detail)}</span>` : ''}</span></div>`).join('')}${i.ship ? `<div class="row"><span class="ico w">${I.mail}</span><span class="grow"><span class="t">Ship it</span><br><span class="sub">${esc(i.ship)}</span></span></div>` : ''}</div></div>
+    ${i.ways.length ? `<div class="sec"><h2>Other ways to help</h2><div class="list">${i.ways.map((w, k) => `<div class="row"><span class="ico s">${I.tCommunity}</span><span class="grow"><span class="t">${esc(w.text)}</span><br><span class="sub">${w.n} signed up</span></span><button class="btn ${w.joined ? 'soft' : ''} sm" data-a="iWay:${i.id}:${k}" aria-pressed="${w.joined}">${w.joined ? I.check + 'Signed up' : 'Sign up'}</button></div>`).join('')}</div></div>` : ''}
+    ${i.rewards.length ? `<div class="sec"><h2>Goals and rewards</h2><div class="list">${[...i.rewards].sort((a, b) => a.pct - b.pct).map(r => { const on = p >= r.pct, at = Math.ceil(need * r.pct / 100);
+      return `<div class="row"><span class="ico ${on ? 's' : 'off'}">${I.gift}</span><span class="grow"><span class="t">${esc(r.text)}</span><br><span class="sub">At ${r.pct}% · ${at} ${esc(i.unit)}</span></span>${on ? '<span class="pill wilting plain">Unlocked</span>' : `<span class="sub" style="white-space:nowrap">${at - got} to go</span>`}</div>`; }).join('')}</div>
+      <p class="sub" style="margin-top:8px">Rewards go to everyone who contributed. Helping reach a goal also earns you 25 points, or 50 for the final goal.</p></div>` : ''}
+    <div class="sec"><h2>Recent supporters</h2><div class="list">${i.recent.slice(0, 5).map(r => `<div class="row"><span class="avatar ${r[0] === S.user.handle ? 'me' : ''}">${r[0].slice(0, 2).toUpperCase()}</span><span class="grow"><span class="t">@${esc(r[0])}${r[0] === S.user.handle ? ' (you)' : ''}</span><br><span class="sub">Pledged ${esc(r[1])}</span></span><span class="sub">${r[2]}</span></div>`).join('') || '<div class="row sub">No pledges yet. Be the first.</div>'}</div></div>`;
 }
 const tagClass = t => t === 'Question' ? 'q' : t === 'Show and tell' ? 'show' : '';
 const ageText = h => h < 1 ? 'just now' : h < 24 ? `${h} h ago` : `${Math.round(h / 24)} d ago`;
@@ -1220,6 +1365,38 @@ function sheetHTML(){
     case 'soilvals': { const so = soilOf(sh.a), v = so.vals || {}; return ['Enter lab results', `<form class="form" data-f="soilVals:${sh.a}"><p class="sub">Copy the numbers from your lab report. Leave a box empty if the report does not include it.</p>
         <div class="fgrid">${Object.entries(SOIL_REF).map(([k, r]) => `<label class="fld"><span>${r.label}${r.unit ? ' (' + r.unit + ')' : ''}</span><input id="soil-${k}" type="number" name="${k}" step="${r.step}" min="0" inputmode="decimal" value="${v[k] ?? ''}" placeholder="${SOIL_SAMPLE[k]}"></label>`).join('')}</div>
         <button class="btn block" type="submit">Save results</button></form>`]; }
+    case 'give': { const i = S.inits.find(x => x.id === sh.a), it = i.items[sh.item], left = it.need - it.got;
+      const opts = [...i.drop.map((d, k) => [String(k), d.name, d.detail]), ...(i.ship ? [['ship', 'Ship it', i.ship]] : [])];
+      return ['Contribute', `<form class="form" data-f="give:${i.id}"><p class="sub">${esc(i.title)}</p>
+        <div class="fld"><span>What are you giving?</span><div class="list">${i.items.map((x, k) => { const l = x.need - x.got;
+          return `<button type="button" class="optrow ${sh.item === k ? 'on' : ''}" data-a="giveItem:${k}" aria-pressed="${sh.item === k}" ${l <= 0 ? 'disabled' : ''}><span class="radio"></span><span class="grow"><span class="t">${esc(x.name)}</span><br><span class="sub">${l > 0 ? l + ' more needed' : 'Covered'}</span></span></button>`; }).join('')}</div></div>
+        <div class="fld"><span>How many ${esc(i.unit)}? Up to ${left}.</span><div class="stepper"><button type="button" data-a="giveQty:-1" aria-label="Fewer">−</button><output>${sh.qty}</output><button type="button" data-a="giveQty:1" aria-label="More">+</button></div></div>
+        <div class="fld"><span>How will you get it there?</span><div class="list">${opts.map(o => `<button type="button" class="optrow ${sh.via === o[0] ? 'on' : ''}" data-a="setv:sheet.via:${o[0]}" aria-pressed="${sh.via === o[0]}"><span class="radio"></span><span class="grow"><span class="t">${esc(o[1])}</span><br><span class="sub">${esc(o[2])}</span></span></button>`).join('')}</div></div>
+        <label class="fld"><span>Note for the organiser (optional)</span><textarea id="give-note" data-bind="sheet.note" style="min-height:60px" placeholder="For example, when you will drop it off">${esc(sh.note)}</textarea></label>
+        <button class="btn block" type="submit">Pledge ${sh.qty} ${esc(it.name)}<span class="pts" style="margin-left:6px">+${givePts(sh.qty)}</span></button></form>`]; }
+    case 'newinit': { const del = (list, k) => `<button type="button" class="xbtn" data-a="niDel:${list}:${k}" aria-label="Remove" ${list === 'items' && sh.items.length < 2 ? 'disabled' : ''}>${I.x}</button>`;
+      return ['Start an initiative', `<form class="form" data-f="newinit" novalidate><p class="sub">Ask neighbours for plants or crops for a cause you care about. Everyone who helps earns points.</p>
+        <label class="fld"><span>Name of the initiative</span><input id="ni-title" type="text" data-bind="sheet.title" value="${esc(sh.title)}" maxlength="60" placeholder="For example, Seedlings for the food bank garden"></label>
+        <label class="fld"><span>What is it for?</span><textarea id="ni-about" data-bind="sheet.about" placeholder="Who it helps and what happens to the donations">${esc(sh.about)}</textarea></label>
+        <label class="fld"><span>Garden or group (optional)</span><input id="ni-org" type="text" data-bind="sheet.org" value="${esc(sh.org)}" maxlength="40" placeholder="${esc(S.user.name)}"></label>
+        <div class="fsec"><h3>Plants or crops needed</h3>
+          <label class="fld"><span>Counted in</span><select id="ni-unit" data-bind="sheet.unit">${UNITS.map(u => `<option ${sh.unit === u ? 'selected' : ''}>${u}</option>`).join('')}</select></label>
+          ${sh.items.map((x, k) => `<div class="erow"><input id="ni-item-${k}" type="text" data-bind="sheet.items.${k}.name" value="${esc(x.name)}" maxlength="30" placeholder="Crop, e.g. Tomato" aria-label="Plant or crop ${k + 1}"><input id="ni-need-${k}" type="number" min="1" inputmode="numeric" data-bind="sheet.items.${k}.need" value="${esc(x.need)}" placeholder="Qty" aria-label="How many ${k + 1}">${del('items', k)}</div>`).join('')}
+          <button type="button" class="btn ghost sm" data-a="niAdd:items" style="align-self:flex-start">${I.plus}Add a crop</button>
+          <div class="total"><span>Target goal</span><span id="ni-total">${niTotal()} ${esc(sh.unit)}</span></div></div>
+        <label class="fld"><span>End date</span><input id="ni-ends" type="date" data-bind="sheet.ends" value="${sh.ends}" min="${ymd(dAhead(1))}"></label>
+        <div class="fsec"><h3>Drop-off locations</h3>
+          ${sh.drop.map((d, k) => `<div class="erow two"><input id="ni-drop-${k}" type="text" data-bind="sheet.drop.${k}.name" value="${esc(d.name)}" maxlength="60" placeholder="Place" aria-label="Drop-off place ${k + 1}"><input id="ni-hours-${k}" type="text" data-bind="sheet.drop.${k}.detail" value="${esc(d.detail)}" maxlength="40" placeholder="Days and hours" aria-label="Drop-off hours ${k + 1}">${del('drop', k)}</div>`).join('')}
+          <button type="button" class="btn ghost sm" data-a="niAdd:drop" style="align-self:flex-start">${I.plus}Add a location</button>
+          <div class="seg"><button type="button" class="${sh.ship === 'no' ? 'on' : ''}" data-a="setv:sheet.ship:no">Drop-off only</button><button type="button" class="${sh.ship === 'yes' ? 'on' : ''}" data-a="setv:sheet.ship:yes">Also accept shipping</button></div>
+          ${sh.ship === 'yes' ? `<input id="ni-address" type="text" data-bind="sheet.address" value="${esc(sh.address)}" maxlength="80" placeholder="Mailing address" aria-label="Mailing address">` : ''}</div>
+        <div class="fsec"><h3>Other ways to help <small>optional</small></h3>
+          ${sh.ways.map((w, k) => `<div class="erow one"><input id="ni-way-${k}" type="text" data-bind="sheet.ways.${k}.text" value="${esc(w.text)}" maxlength="70" placeholder="For example, Help on planting day" aria-label="Way to help ${k + 1}">${del('ways', k)}</div>`).join('')}
+          <button type="button" class="btn ghost sm" data-a="niAdd:ways" style="align-self:flex-start">${I.plus}Add a way to help</button></div>
+        <div class="fsec"><h3>Goals and rewards <small>optional</small></h3><p class="sub">Unlock a reward for everyone who contributed when the group reaches a goal.</p>
+          ${sh.rewards.map((r, k) => `<div class="erow rw"><select id="ni-pct-${k}" data-bind="sheet.rewards.${k}.pct" aria-label="Goal ${k + 1}">${[25, 50, 75, 100].map(v => `<option value="${v}" ${+r.pct === v ? 'selected' : ''}>At ${v}%</option>`).join('')}</select><input id="ni-reward-${k}" type="text" data-bind="sheet.rewards.${k}.text" value="${esc(r.text)}" maxlength="60" placeholder="Reward" aria-label="Reward ${k + 1}">${del('rewards', k)}</div>`).join('')}
+          <button type="button" class="btn ghost sm" data-a="niAdd:rewards" style="align-self:flex-start">${I.plus}Add a reward</button></div>
+        <button class="btn block" type="submit">Start initiative<span class="pts" style="margin-left:6px">+30</span></button></form>`]; }
     case 'dx': return dxSheet(sh);
     case 'setup': return setupSheet(sh);
     case 'tour': return ['Demo guide', `<p class="sub">Everything here runs on sample data. Nothing is sent anywhere, and it resets when you reload.</p><div class="list">${[
@@ -1234,6 +1411,7 @@ function sheetHTML(){
       ['Supervisor setup with an AR scan','Gardens tab. Set up a new garden.','setup'],
       ['Map of nearby plant alerts','Gardens tab, Map.','go:gardens:map'],
       ['Posts, votes and leaderboard','Community tab.','go:community'],
+      ['Back or start a community initiative','Community tab, Initiatives.','goInit'],
       ['Levels and store rewards','Profile tab.','go:profile'],
     ].map(t => `<button class="row" data-a="${t[2]}"><span class="grow"><span class="t">${t[0]}</span><br><span class="sub">${t[1]}</span></span>${I.chev}</button>`).join('')}</div>`];
   }
@@ -1281,7 +1459,7 @@ const scrollMem = {}; let lastKey = '';
 const viewKey = () => { const t = cur(); return S.tab + (t ? `/${t.v}/${t.id}/${t.x || ''}` : ''); };
 function viewHTML(){
   const t = cur();
-  if (t) switch (t.v){ case 'plant': return vPlant(t.id); case 'q': return vQuestion(t); case 'garden': return vGarden(t.id); case 'post': return vPost(t.id); case 'soil': return vSoil(t.id); }
+  if (t) switch (t.v){ case 'plant': return vPlant(t.id); case 'q': return vQuestion(t); case 'garden': return vGarden(t.id); case 'post': return vPost(t.id); case 'soil': return vSoil(t.id); case 'init': return vInit(t.id); }
   return {buddies:vBuddies, gardens:vGardens, scan:vScan, community:vCommunity, profile:vProfile}[S.tab]();
 }
 function render(enter){
@@ -1320,7 +1498,7 @@ function earn(n, why){
 function openSheet(type, a, extra = {}){ S.sheet = {type, a, fresh:true, ...extra}; renderSheet(); }
 function resolve(path){
   const parts = path.split('.');
-  if (parts[0] === 'sheet') return [S.sheet, parts[1]];
+  if (parts[0] === 'sheet'){ let o = S.sheet; parts.slice(1, -1).forEach(k => o = o[k]); return [o, parts[parts.length - 1]]; }
   if (parts[0] === 'setup') return [S.sheet.plants[+parts[1]], parts[2]];
   return [plant(parts[0].slice(2)), parts[1]];
 }
@@ -1352,6 +1530,28 @@ const A = {
   soilAI(id){ const so = soilOf(id); so.ai = 'loading'; render(); setTimeout(() => { so.ai = 'done'; const t = cur(); if (t?.v === 'soil' && t.id === id && !S.sheet) render(); }, 1500); },
   soilAgro(id, aid){ const so = soilOf(id); so.agro = aid; so.agroReply = false; render(); toast('Review requested');
     setTimeout(() => { so.agroReply = true; toast(`${AGROS.find(a => a.id === aid).name} replied about ${plant(id).name}`); const t = cur(); if (t?.v === 'soil' && t.id === id && !S.sheet) render(); }, 3500); },
+  goInit(){ S.tab = 'community'; S.nav.community = []; S.sheet = null; S.seg.community = 'init'; render(); },
+  give(id, k){
+    const i = S.inits.find(x => x.id === id), first = i.items.findIndex(x => x.got < x.need);
+    const item = k !== undefined && i.items[+k].got < i.items[+k].need ? +k : first; if (item < 0) return;
+    openSheet('give', id, {item, qty:1, via: i.drop.length ? '0' : 'ship', note:''});
+  },
+  giveItem(k){ const sh = S.sheet, it = S.inits.find(x => x.id === sh.a).items[+k]; sh.item = +k; sh.qty = Math.max(1, Math.min(sh.qty, it.need - it.got)); renderSheet(); },
+  giveQty(d){ const sh = S.sheet, it = S.inits.find(x => x.id === sh.a).items[sh.item]; sh.qty = Math.max(1, Math.min(it.need - it.got, sh.qty + +d)); renderSheet(); },
+  iWay(id, k){
+    const w = S.inits.find(x => x.id === id).ways[+k]; w.joined = !w.joined; w.n += w.joined ? 1 : -1; render();
+    if (w.joined && !w.earned){ w.earned = true; earn(10, 'Signed up to help'); } else if (w.joined) toast('Signed up');
+  },
+  newInit(){
+    S.sheet = {type:'newinit', fresh:true, title:'', about:'', org:'', unit:'plants', ends:ymd(dAhead(28)), items:[{name:'', need:''}, {name:'', need:''}], drop:[{name:'', detail:''}], ship:'no', address:'', ways:[], rewards:[]};
+    renderSheet();
+  },
+  niAdd(list){
+    const sh = S.sheet, blank = {items:{name:'', need:''}, drop:{name:'', detail:''}, ways:{text:''}, rewards:{pct: String([25, 50, 75, 100].find(v => !sh.rewards.some(r => +r.pct === v)) || 100), text:''}}[list];
+    sh[list].push(blank); renderSheet();
+    const n = sh[list].length - 1; document.getElementById({items:'ni-item-', drop:'ni-drop-', ways:'ni-way-', rewards:'ni-reward-'}[list] + n)?.focus();
+  },
+  niDel(list, k){ S.sheet[list].splice(+k, 1); renderSheet(); },
   check(id, i){ S.checks[id + i] = !S.checks[id + i]; render(); },
   diagnose(id){ openSheet('dx', id, {scanning:true}); setTimeout(() => { if (S.sheet?.type === 'dx' && S.sheet.a === id){ S.sheet.scanning = false; renderSheet(); } }, 1500); },
   treated(id){ const p = plant(id), n = ISSUES[p.issue].name.toLowerCase(); p.issue = null; S.log.unshift({g:p.where, plant:id, action:'Treated for ' + n, who:'You', days:0, note:''}); S.user.tasks++; S.sheet = null; render(); earn(15, `Treated ${p.name}`); },
@@ -1443,6 +1643,33 @@ const A = {
   },
 };
 const F = {
+  give(id){
+    const sh = S.sheet, i = S.inits.find(x => x.id === id), it = i.items[sh.item], qty = Math.min(sh.qty, it.need - it.got);
+    if (qty <= 0) return toast('That one is already covered. Pick another crop.');
+    const first = !i.yours, goals = iApply(i, sh.item, qty, S.user.handle);
+    i.yours += qty; if (first) i.supporters++;
+    const where = sh.via === 'ship' ? 'Ship it to ' + i.ship : 'Bring it to ' + i.drop[+sh.via].name;
+    S.sheet = null; render(); earn(givePts(qty), `Pledged ${qty} ${it.name}`);
+    setTimeout(() => toast(where), 600);
+    iCelebrate(i, goals, i.mine);
+  },
+  newinit(){
+    const sh = S.sheet, need = id => { document.getElementById(id)?.focus(); };
+    const title = sh.title.trim(), items = sh.items.map(x => ({name:x.name.trim(), need:parseInt(x.need) || 0, got:0})).filter(x => x.name && x.need > 0);
+    const drop = sh.drop.map(d => ({name:d.name.trim(), detail:d.detail.trim()})).filter(d => d.name), ship = sh.ship === 'yes' ? sh.address.trim() : '';
+    if (!title){ toast('Give the initiative a name'); return need('ni-title'); }
+    if (!items.length){ toast('Add at least one crop and how many you need'); return need('ni-item-0'); }
+    if (sh.ship === 'yes' && !ship){ toast('Add a mailing address, or switch to drop-off only'); return need('ni-address'); }
+    if (!drop.length && !ship){ toast('Add a drop-off location or accept shipping'); return need('ni-drop-0'); }
+    const seen = new Set(), rewards = sh.rewards.map(r => ({pct:+r.pct, text:r.text.trim()})).filter(r => r.text && !seen.has(r.pct) && seen.add(r.pct));
+    let ends = fromYmd(sh.ends); if (!ends || ends < dAhead(1)) ends = dAhead(28);
+    const id = 'i' + Date.now();
+    S.inits.unshift({id, title, about:sh.about.trim() || 'No description yet.', by:S.user.name, handle:S.user.handle, org:sh.org.trim() || S.user.name, unit:sh.unit, ends,
+      items, drop, ship, ways:sh.ways.map(w => w.text.trim()).filter(Boolean).map(text => ({text, n:0, joined:false})), rewards, supporters:0, yours:0, mine:true, recent:[]});
+    S.sheet = null; S.tab = 'community'; S.seg.community = 'init'; S.nav.community = [{v:'init', id}];
+    render(true); earn(30, 'Started an initiative');
+    setTimeout(() => iNeighbour(id), 5000);
+  },
   soilVals(id, fd){
     const so = soilOf(id), vals = {};
     for (const k of Object.keys(SOIL_REF)){ const x = parseFloat(fd.get(k)); vals[k] = Number.isFinite(x) && x >= 0 ? x : (so.vals?.[k] ?? SOIL_SAMPLE[k]); }
@@ -1492,7 +1719,8 @@ function bind(e){
     return;
   }
   if (t.dataset?.rec !== undefined){ S.rec.map[S.rec.labels[+t.dataset.rec]] = t.value; recSave(); recReset(); return; }
-  if (t.dataset?.bind){ const [o, k] = resolve(t.dataset.bind); o[k] = t.value; }
+  if (t.dataset?.bind){ const [o, k] = resolve(t.dataset.bind); o[k] = t.value;
+    if (S.sheet?.type === 'newinit'){ const el = document.getElementById('ni-total'); if (el) el.textContent = niTotal() + ' ' + S.sheet.unit; } }
   if (t.dataset?.filter){
     S.forumQ = t.value; const f = t.value.toLowerCase(); let n = 0;
     document.querySelectorAll('#' + t.dataset.filter + ' [data-text]').forEach(r => { const ok = r.dataset.text.includes(f); r.hidden = !ok; if (ok) n++; });

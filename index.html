@@ -495,6 +495,8 @@ const CARE = {
     ['Water every 3 days','Even moisture prevents blossom end rot.'],['Support branches with fruit','A small cage or stake stops them splitting.'],['Pick the first peppers early','It tells the plant to make more.']]},
   fern:{species:'Boston fern',latin:'Nephrolepis exaltata',every:5,sun:'Shade',soil:'Potting mix',fert:'Balanced feed monthly',hours:'Bright shade',steps:[
     ['Water every 5 days','Keep the soil damp, never soggy.'],['Mist the fronds twice a week','Dry air turns the tips brown.'],['Snip off brown fronds at the base','New ones grow from the centre.']]},
+  croton:{species:'Croton Petra',latin:"Codiaeum variegatum 'Petra'",every:7,sun:'Part shade',soil:'Potting mix',fert:'Balanced feed monthly',hours:'Bright light, some direct sun',steps:[
+    ['Water when the top 2 cm is dry','About once a week. Crotons droop dramatically when thirsty and stand back up within hours of a drink.'],['Give it your brightest spot','In dim light the red, orange and yellow fade to plain green. A few hours of morning sun keeps the colour.'],['Keep it above 15°C, away from drafts','Cold windows and doorways make it drop leaves.'],['Wipe the leaves every few weeks','Dust blocks light, and dry air invites spider mites. Mist it when the heating is on.'],['Wear gloves when pruning','The milky sap irritates skin and is toxic to cats and dogs.']]},
   succulent:{species:'Echeveria',latin:'Echeveria elegans',every:21,sun:'Full sun',soil:'Sandy, fast-draining',fert:'None needed',hours:'6 hours',steps:[
     ['Water every 3 weeks','Soak it, then let it dry out fully.'],['Turn the pot a quarter each week','It keeps the rosette from leaning toward the window.'],['Pull off dried lower leaves','They can hide mealybugs.']]},
 };
@@ -516,7 +518,7 @@ const MOOD = {
   wilting:{label:'Wilting',droop:1.95,tint:.7,health:37},
   sick:{label:'Unwell',droop:1.35,tint:.3,health:54},
 };
-const VTOP = {sunflower:-14,tomato:6,pepper:6,rosemary:22,fern:24,basil:34,kale:32,succulent:44};
+const VTOP = {croton:26,sunflower:-14,tomato:6,pepper:6,rosemary:22,fern:24,basil:34,kale:32,succulent:44};
 const POTS = ['#C96B4B','#3D7EA6','#D99A1C','#8A68AB','#D2596C','#4F8F74'];
 const LEVELS = [['Seedling',0],['Sprout',250],['Gardener',750],['Grower',1500],['Master Farmer',3000]];
 const EARN = [['Answer a question',15],['Get an upvote on your answer',5],['Share a tip or post',10],['Log a garden task',10],['Help with a nearby alert',20],['Add and name a plant',20],['Complete a soil test',20],['Contribute to an initiative, plus 2 per item',10],['Sign up to help an initiative',10],['Help an initiative reach a goal',25],['Start an initiative',30],['Set up a garden',50]];
@@ -644,7 +646,7 @@ const S = {
   plants:[
     mk('fern','Fernando','fern','home',9,{mine:true,pot:3}),
     mk('kaleb','Kale-b','kale','g1',2,{mine:true,pot:1,bed:'Bed 2',issue:'aphids'}),
-    mk('herb','Herb','basil','g1',5,{mine:true,pot:2,bed:'Bed 3'}),
+    mk('herb','Herb','croton','g1',8,{mine:true,pot:2,bed:'Bed 3'}),
     mk('bob','Bob','rosemary','g1',sinceTuesday,{mine:true,pot:0,bed:'Bed 3',note:'Established plant. Resist the urge to water.'}),
     mk('spike','Spike','succulent','home',6,{mine:true,pot:4}),
     mk('sunny','Sunny','sunflower','g1',3,{pot:2,bed:'Bed 1'}),
@@ -667,7 +669,7 @@ const S = {
     {g:'g1',plant:'kaleb',action:'Checked for pests',who:'Tom',days:1,note:'Found aphids on the underside. Flagged for treatment.'},
     {g:'g1',plant:'sunny',action:'Watered',who:'You',days:3,note:''},
     {g:'g1',plant:null,action:'Weeded beds 1 to 3',who:'Priya',days:4,note:''},
-    {g:'g1',plant:'herb',action:'Watered',who:'Sam',days:5,note:'Pinched off two flower buds.'},
+    {g:'g1',plant:'herb',action:'Watered',who:'Sam',days:8,note:'Wiped the dust off his leaves.'},
     {g:'home',plant:'spike',action:'Watered',who:'You',days:6,note:''},
     {g:'home',plant:'fern',action:'Watered',who:'You',days:9,note:''},
   ],
@@ -715,6 +717,15 @@ const S = {
         {by:'priya_plants',lvl:'Grower',text:'Dry air or dry soil. Mist it, move it away from heating vents and water before the soil dries out.',votes:25,voted:false}]},
       {id:'q2',q:'How much light is too much?',by:'tom_k',votes:4,voted:false,answers:[]},
     ],
+    croton:[
+      {id:'q1',q:'Every leaf suddenly drooped. Is it dying?',by:'noor_a',votes:24,voted:false,answers:[
+        {by:'priya_plants',lvl:'Grower',text:'Almost always thirst. Crotons droop hard once the top few centimetres dry out. Water it well and it should stand back up within a few hours.',votes:28,voted:false}]},
+      {id:'q2',q:'Why is my Petra losing its red and orange colour?',by:'jin_p',votes:15,voted:false,answers:[
+        {by:'dana_o',lvl:'Master Farmer',text:'Not enough light. Move it to your brightest window. New leaves come in more colourful within a few weeks.',votes:19,voted:false}]},
+      {id:'q3',q:'It dropped a bunch of leaves after I brought it home.',by:'ana_s',votes:11,voted:false,answers:[
+        {by:'leo_grows',lvl:'Grower',text:'Crotons sulk after a move or a cold draft. Keep it warm, hold off on repotting, and give it a month.',votes:13,voted:false}]},
+      {id:'q4',q:'Is the sap safe around my cat?',by:'omar_h',votes:6,voted:false,answers:[]},
+    ],
     succulent:[
       {id:'q1',q:'Leaves are wrinkling. Too much water or too little?',by:'li_wei',votes:17,voted:false,answers:[
         {by:'sam_seeds',lvl:'Sprout',text:'Wrinkled and firm means thirsty. Soft and see-through means overwatered.',votes:20,voted:false}]},
@@ -746,7 +757,7 @@ const S = {
 const SCENE = [{id:'sunny',x:72,y:332,s:1.7},{id:'tomas',x:196,y:332,s:1.7},{id:'u1',x:320,y:332,s:1.7},{id:'kaleb',x:74,y:462,s:1.9},{id:'bob',x:197,y:462,s:1.9},{id:'herb',x:318,y:462,s:1.9}];
 const WPOS = [[22,34],[50,30],[78,36],[24,72],[52,74],[79,70]];
 const MOODDOT = {thriving:'#4CC27F',okay:'#B9C7BC',thirsty:'#5AA9EE',wilting:'#F5C04A',sick:'#F0695E'};
-const DIM = {sunflower:[30,92],tomato:[32,64],pepper:[32,64],kale:[40,44],rosemary:[32,54],basil:[38,40],fern:[44,50],succulent:[30,28]};
+const DIM = {croton:[40,48],sunflower:[30,92],tomato:[32,64],pepper:[32,64],kale:[40,44],rosemary:[32,54],basil:[38,40],fern:[44,50],succulent:[30,28]};
 
 /* ---------- derived ---------- */
 const plant = id => S.plants.find(p => p.id === id);
@@ -807,6 +818,13 @@ function foliage(kind, md){
         ? '<circle cx="-13" cy="-9" r="6.5" fill="#E5483B"/><circle cx="12" cy="-23" r="6" fill="#E5483B"/><circle cx="-9" cy="-37" r="5" fill="#EF7B45"/>'
         : '<ellipse cx="-12" cy="-7" rx="5" ry="9" fill="#E9A21B"/><ellipse cx="12" cy="-20" rx="4.6" ry="8.5" fill="#D9463B"/>')
       + '</g>';
+  }
+  else if (kind === 'croton'){
+    const L = (a, len, w, fill, vein) => { const d = Math.max(-128, Math.min(128, a * dr + (a === 0 ? (dr - 1) * 40 : 0)));
+      return `<g transform="rotate(${d.toFixed(1)})"><path d="${leafPath(len, w)}" fill="${fill}"/><path d="M0 -4V${-len + 6}" stroke="${vein}" stroke-width="2.2" stroke-linecap="round"/></g>`; };
+    s = L(-74,36,14,g('#2F6B3A'),g('#F2C230')) + L(74,36,14,g('#2F6B3A'),g('#F2C230'))
+      + L(-46,42,15,g('#E9A21B'),'#C2402F') + L(46,42,15,g('#3E7A3C'),g('#F2C230'))
+      + L(-16,44,15,g('#D2463B'),'#F6D06A') + L(16,40,14,g('#E8B42A'),'#C2402F');
   }
   else if (kind === 'sunflower'){
     const petal = g('#F4B91F');

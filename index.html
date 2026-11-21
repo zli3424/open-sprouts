@@ -267,6 +267,14 @@ textarea{min-height:88px;resize:vertical}
 .cam-bottom .seg button.on{background:#fff;color:#111}
 .shutter{width:66px;height:66px;border-radius:50%;background:#fff;border:5px solid rgba(255,255,255,.4);background-clip:padding-box}
 .shutter:active{transform:scale(.94)}
+.shutter{display:grid;place-items:center;color:#1B7A46}
+.shutter svg{width:28px;height:28px}
+.shutter[data-mode="diagnose"]{color:#C2402F}
+.shutter[disabled]{opacity:.55;cursor:default}
+.aim{position:absolute;left:50%;top:50%;width:84px;height:84px;transform:translate(-50%,-50%);pointer-events:none;color:#fff;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+.aim svg{width:100%;height:100%}
+.scene .hint{animation:hintp 1.8s ease-in-out infinite alternate}
+@keyframes hintp{from{opacity:.45}to{opacity:.95}}
 .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
 .flash.go{animation:flash .35s ease-out}
 @keyframes flash{from{opacity:.9}to{opacity:0}}
@@ -857,7 +865,7 @@ function plantSVG(p, size = 96, md = mood(p)){
 function corners(x0, y0, x1, y1, l = 14){
   return `M${x0} ${y0+l}V${y0}H${x0+l}M${x1-l} ${y0}H${x1}V${y0+l}M${x1} ${y1-l}V${y1}H${x1-l}M${x0+l} ${y1}H${x0}V${y1-l}`;
 }
-function sceneSVG({overlay = true, sel = null, busy = null, found = 99, tap = true, generic = false} = {}){
+function sceneSVG({overlay = true, sel = null, busy = null, found = 99, tap = true, generic = false, single = false} = {}){
   let planks = ''; for (let x = 0; x < 390; x += 39) planks += `<rect x="${x + 1}" y="118" width="37" height="182" rx="3" fill="${x % 78 ? '#C7A476' : '#BE9A6B'}"/>`;
   let rows = ''; for (let y = 372; y < 700; y += 68) rows += `<rect x="0" y="${y}" width="390" height="22" fill="#5E3F2B" opacity=".55"/>`;
   let pl = '', ov = '';
@@ -866,6 +874,12 @@ function sceneSVG({overlay = true, sel = null, busy = null, found = 99, tap = tr
     pl += `<ellipse cx="${sp.x}" cy="${sp.y + 3}" rx="${30 * sp.s}" ry="${7 * sp.s}" fill="#4A3020"/><g transform="translate(${sp.x} ${sp.y}) scale(${sp.s})">${foliage(p.kind, md)}</g>`;
     if (!overlay || i >= found) return;
     const [w, h] = DIM[p.kind], hw = Math.min(w * sp.s, 58), x0 = sp.x - hw, x1 = sp.x + hw, y0 = sp.y - h * sp.s - 6, y1 = sp.y + 10;
+    const focus = busy || sel;
+    if (single && focus !== sp.id){
+      if (!focus) ov += `<g class="hint"><circle cx="${sp.x}" cy="${(y0 + y1) / 2}" r="10" fill="none" stroke="#fff" stroke-width="2"/><circle cx="${sp.x}" cy="${(y0 + y1) / 2}" r="3.5" fill="#fff"/></g>`;
+      if (tap) ov += `<rect x="${x0}" y="${y0 - 30}" width="${x1 - x0}" height="${y1 - y0 + 30}" fill="transparent" data-a="scanTap:${sp.id}" role="button" tabindex="0" aria-label="Plant ${i + 1}"/>`;
+      return;
+    }
     const on = sel === sp.id, col = on ? '#F2B01E' : '#FFFFFF';
     const label = generic ? CARE[p.kind].species : p.unnamed ? CARE[p.kind].species + '?' : p.name, lw = label.length * 7.4 + 30;
     const dot = MOODDOT[md];
@@ -977,6 +991,12 @@ function liveMarks(){
     const label = m.pending ? 'Identifying…' : p.unnamed ? CARE[p.kind].species + '?' : p.name;
     return `<div class="mark ${sc.sel === m.id ? 'on' : ''} ${busy ? 'busy' : ''}" style="left:${m.x.toFixed(1)}%;top:${m.y.toFixed(1)}%">${BRACKET}${busy ? '<span class="mk-scan"></span>' : ''}<button class="mk-label" data-a="scanTap:${m.id}">${m.pending ? '' : `<i style="background:${MOODDOT[mood(p)]}"></i>`}${esc(label)}${m.conf ? ` <span class="mk-conf">${Math.round(m.conf * 100)}%</span>` : ''}</button></div>`;
   }).join('')}</div>`;
+}
+// The sample-garden plant closest to the middle of the camera view
+function camAim(){
+  let best = SCENE[0].id, bd = Infinity;
+  SCENE.forEach(sp => { const cy = sp.y - DIM[plant(sp.id).kind][1] * sp.s / 2, d = Math.hypot(sp.x - 195, cy - 350); if (d < bd){ bd = d; best = sp.id; } });
+  return best;
 }
 const thumbHTML = ph => ph?.url ? `<img src="${ph.url}" alt="">` : sceneSVG({overlay:false, tap:false});
 
@@ -1125,7 +1145,9 @@ function vQuestion(t){
 function vScan(){
   const sc = S.scan, cm = S.cam, real = cm.src !== 'sample', p = sc.sel && plant(sc.sel);
   const recOn = cm.src === 'live' && S.rec.status === 'ready', lk = recOn && S.rec.locked && plant(S.rec.locked);
-  const hint = sc.busy ? 'Scanning leaves…' : recOn && sc.mode !== 'photo' ? (lk ? (sc.mode === 'diagnose' ? `Tap to check ${lk.name} for pests and disease` : `Recognised ${lk.name}`) : 'Looking for your plants…') : real && sc.mode === 'identify' ? 'Point at a plant and tap it' : real && sc.mode === 'diagnose' ? 'Tap a plant to check it for pests and disease' : sc.mode === 'identify' ? 'Tap a plant to see what it is and how it is doing' : sc.mode === 'diagnose' ? 'Tap a plant to check it for pests and disease' : 'Press the shutter to save a photo to the garden album';
+  const hint = sc.busy ? (sc.mode === 'diagnose' ? 'Checking for pests and disease…' : 'Identifying…') : recOn && sc.mode !== 'photo' ? (lk ? (sc.mode === 'diagnose' ? `Tap to check ${lk.name} for pests and disease` : `Recognised ${lk.name}`) : 'Looking for your plants…') : sc.mode === 'identify' ? 'Tap a plant, or aim at one and press the button' : sc.mode === 'diagnose' ? 'Tap a plant to check it for problems, or aim and press the button' : 'Press the button to save a photo to the garden album';
+  const shut = {identify:['Identify the plant in the middle', I.search], diagnose:['Check the plant in the middle for problems', I.scanIc], photo:['Take a photo', '']}[sc.mode];
+  const aim = sc.mode !== 'photo' && !sc.busy && !sc.sel && !(recOn && lk) && !(real && S.cam.marks.length);
   let pop = '';
   if (p && sc.mode === 'identify'){
     const c = CARE[p.kind], md = mood(p);
@@ -1137,12 +1159,13 @@ function vScan(){
           : `<button class="btn sm" data-a="openPlant:${p.id}">Open buddy</button><button class="btn ghost sm" data-a="scanDx:${p.id}">Diagnose</button>`}</div></div></div>`;
   }
   return `<div class="cam">
-    ${real ? `<div class="media" ${cm.src === 'live' ? 'data-media' : ''}>${cm.src === 'photo' ? `<img src="${cm.photo}" alt="Your photo">` : ''}</div>${sc.mode !== 'photo' ? liveMarks() : ''}` : sceneSVG({overlay: sc.mode !== 'photo', sel: sc.sel, busy: sc.busy})}
+    ${real ? `<div class="media" ${cm.src === 'live' ? 'data-media' : ''}>${cm.src === 'photo' ? `<img src="${cm.photo}" alt="Your photo">` : ''}</div>${sc.mode !== 'photo' ? liveMarks() : ''}` : sceneSVG({overlay: sc.mode !== 'photo', sel: sc.sel, busy: sc.busy, single: true})}
+    ${aim ? `<div class="aim" aria-hidden="true"><svg viewBox="0 0 84 84"><path d="${corners(3, 3, 81, 81, 16)}" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M42 36v12M36 42h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>` : ''}
     <div class="cam-top"><button class="cam-chip" data-a="sheet:camsrc" aria-label="Change camera source"><i class="${cm.src === 'live' ? 'rec' : ''}"></i>${{sample:'Sample garden', live:'Live camera', photo:'Your photo'}[cm.src]}${I.down}</button><button class="cam-roll" data-a="sheet:photos" aria-label="Open photos"><span class="thumb">${thumbHTML(S.photos[0])}</span>${S.photos.length}</button></div>
     ${pop}
     <div class="cam-bottom"><p class="cam-hint">${hint}</p>
       <div class="seg">${[['identify','Identify'],['diagnose','Diagnose'],['photo','Photo']].map(m => `<button class="${sc.mode === m[0] ? 'on' : ''}" data-a="scanMode:${m[0]}">${m[1]}</button>`).join('')}</div>
-      <button class="shutter" data-a="snap" aria-label="Take a photo"></button></div>
+      <button class="shutter" data-mode="${sc.mode}" data-a="shoot" aria-label="${shut[0]}" ${sc.busy ? 'disabled' : ''}>${shut[1]}</button></div>
     <div class="flash" id="flash"></div></div>`;
 }
 
@@ -1574,7 +1597,7 @@ const A = {
   diagnose(id){ openSheet('dx', id, {scanning:true}); setTimeout(() => { if (S.sheet?.type === 'dx' && S.sheet.a === id){ S.sheet.scanning = false; renderSheet(); } }, 1500); },
   treated(id){ const p = plant(id), n = ISSUES[p.issue].name.toLowerCase(); p.issue = null; S.log.unshift({g:p.where, plant:id, action:'Treated for ' + n, who:'You', days:0, note:''}); S.user.tasks++; S.sheet = null; render(); earn(15, `Treated ${p.name}`); },
   store(key, i, j){ toast(`Demo link. This would open ${ISSUES[key].products[i][1][j][0]} with the Open Sprouts affiliate tag.`); },
-  scanMode(m){ S.scan.mode = m; S.scan.sel = null; render(); },
+  scanMode(m){ S.scan.mode = m; S.scan.sel = null; S.scan.busy = null; S.cam.marks = []; render(); },
   camSrc(src){ S.cam.src = src; S.cam.marks = []; S.cam.tried = true; S.scan.sel = null; S.scan.busy = null; S.sheet = null; camPref(src === 'live'); render(); },
   wizLive(){ S.cam.src = 'live'; S.cam.marks = []; renderSheet(); },
   liveTap(){
@@ -1586,9 +1609,12 @@ const A = {
       S.rec.dismissed = null; S.scan.sel = id; return render();
     }
     const r = $('.cam').getBoundingClientRect(), e = lastEvt;
-    const x = Math.max(22, Math.min(78, (e.clientX - r.left) / r.width * 100)), y = Math.max(42, Math.min(64, (e.clientY - r.top) / r.height * 100));
+    A.markAt((e.clientX - r.left) / r.width * 100, (e.clientY - r.top) / r.height * 100);
+  },
+  markAt(px, py){
+    const x = Math.max(22, Math.min(78, px)), y = Math.max(42, Math.min(64, py));
     const id = SCENE[S.cam.n++ % SCENE.length].id, m = {x, y, id, pending: S.scan.mode === 'identify'};
-    S.cam.marks = [...S.cam.marks.filter(k => k.id !== id).slice(-2), m]; S.scan.sel = null;
+    S.cam.marks = [m]; S.scan.sel = null;
     if (S.scan.mode === 'diagnose') return A.scanDx(id);
     render();
     setTimeout(() => { m.pending = false; if (S.tab === 'scan' && S.cam.marks.includes(m)){ S.scan.sel = id; render(); } }, 900);
@@ -1603,7 +1629,27 @@ const A = {
   },
   scanDx(id){
     S.scan.mode = 'diagnose'; S.scan.sel = id; S.scan.busy = id; render();
-    setTimeout(() => { S.scan.busy = null; if (S.tab === 'scan'){ render(); openSheet('dx', id); } }, 1500);
+    setTimeout(() => { if (S.scan.busy !== id) return; S.scan.busy = null; if (S.tab === 'scan' && !cur()){ render(); openSheet('dx', id); } }, 1500);
+  },
+  shoot(){
+    const sc = S.scan, cm = S.cam;
+    if (sc.busy) return;
+    if (sc.mode === 'photo') return A.snap();
+    if (cm.src === 'live' && S.rec.status === 'ready'){
+      const id = S.rec.locked;
+      if (!id) return toast('No plant recognised yet. Point the camera at one of your plants.');
+      if (sc.mode === 'diagnose') return A.scanDx(id);
+      S.rec.dismissed = null; sc.sel = id; return render();
+    }
+    if (cm.src !== 'sample'){
+      const m = cm.marks[0];
+      if (sc.mode === 'diagnose' && m && !m.pending) return A.scanDx(m.id);
+      return A.markAt(50, 52);
+    }
+    const id = sc.sel || camAim();
+    if (sc.mode === 'diagnose') return A.scanDx(id);
+    sc.sel = null; sc.busy = id; render();
+    setTimeout(() => { if (sc.busy !== id) return; sc.busy = null; if (S.tab === 'scan' && !cur()){ sc.sel = id; render(); } }, 900);
   },
   snap(){
     const f = $('#flash'); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');

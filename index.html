@@ -630,7 +630,9 @@ const INITS = [
 /* ---------- live recognition settings ---------- */
 // Paste a Teachable Machine image model link here to load it for every viewer,
 // or leave it empty and paste the link in the app under Scan > camera source.
-const DEFAULT_MODEL_URL = '';
+const DEFAULT_MODEL_URL = 'https://teachablemachine.withgoogle.com/models/v_-Zizx5l/';
+// Which buddy each class opens (class names matched without regard to case). Classes not listed open nothing.
+const DEFAULT_MODEL_MAP = {'herb':'herb', 'various plants':'', 'not detected':''};
 const REC_MIN = 0.8, REC_STREAK = 3, REC_MISSES = 4, REC_EVERY = 250;
 const REC_LIBS = [
   ['tf', ['https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js', 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js']],
@@ -948,7 +950,7 @@ async function recLoad(url){
     await recLibs();
     recModel = await window.tmImage.load(url + 'model.json', url + 'metadata.json');
     R.labels = recModel.getClassLabels();
-    R.labels.forEach(l => { if (!(l in R.map)){ const m = recPool().find(p => p.name.toLowerCase() === String(l).toLowerCase()); R.map[l] = m ? m.id : ''; } });
+    R.labels.forEach(l => { if (!(l in R.map)){ const k = String(l).trim().toLowerCase(), m = k in DEFAULT_MODEL_MAP ? DEFAULT_MODEL_MAP[k] : recPool().find(p => p.name.toLowerCase() === k)?.id; R.map[l] = m && plant(m) ? m : ''; } });
     R.status = 'ready'; recSave();
   } catch (e) { R.status = 'error'; R.err = String(e?.message || e).slice(0, 180); recModel = null; }
   if (S.sheet?.type === 'camsrc') renderSheet(); else if (S.tab === 'scan' && !S.sheet) render();

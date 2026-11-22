@@ -633,7 +633,7 @@ const INITS = [
 const DEFAULT_MODEL_URL = 'https://teachablemachine.withgoogle.com/models/v_-Zizx5l/';
 // Which buddy each class opens (class names matched without regard to case). Classes not listed open nothing.
 const DEFAULT_MODEL_MAP = {'herb':'herb', 'various plants':'', 'not detected':''};
-const REC_MIN = 0.8, REC_STREAK = 3, REC_MISSES = 4, REC_EVERY = 250;
+const REC_MIN = 0.8, REC_STREAK = 3, REC_MISSES = 4, REC_EVERY = 300, REC_GAP = 2; // REC_GAP: free time left between checks, as a multiple of how long one check takes
 const REC_LIBS = [
   ['tf', ['https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js', 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js']],
   ['tmImage', ['https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8.5/dist/teachablemachine-image.min.js', 'https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js']],
@@ -944,45 +944,92 @@ async function recLibs(){
 async function recLoad(url){
   url = url.trim().replace(/(model|metadata)\.json$/, ''); if (!url) return;
   if (!url.endsWith('/')) url += '/';
-  const R = S.rec; R.url = url; R.status = 'loading'; R.err = ''; recModel = null;
-  if (S.sheet?.type === 'camsrc') renderSheet();
+  const R = S.rec; R.url = url; R.status = 'loading'; R.err = ''; R.ms = 0; R.engine = ''; R.seen = ''; recModel = null;
+  if (S.sheet?.type === 'camsrc') renderSheet(); else setTimeout(() => { if (S.tab === 'scan' && !S.sheet && !cur()) render(); }, 0);
+  const pause = () => new Promise(r => setTimeout(r, 80));   // lets the screen update between heavy steps
   try {
-    await recLibs();
-    recModel = await window.tmImage.load(url + 'model.json', url + 'metadata.json');
+    await recLibs(); await pause();
+    R.engine = await recEngine(); await pause();
+    const m = await window.tmImage.load(url + 'model.json', url + 'metadata.json'); await pause();
+    // The first check is by far the slowest on a phone, so run it now while the screen says "Loading".
+    const ctx = recCanvas.getContext('2d'); ctx.fillStyle = '#808080'; ctx.fillRect(0, 0, 224, 224);
+    await m.predict(recCanvas); await pause();
+    const t0 = performance.now(); await m.predict(recCanvas); R.ms = Math.round(performance.now() - t0);
+    recModel = m;
     R.labels = recModel.getClassLabels();
     R.labels.forEach(l => { if (!(l in R.map)){ const k = String(l).trim().toLowerCase(), m = k in DEFAULT_MODEL_MAP ? DEFAULT_MODEL_MAP[k] : recPool().find(p => p.name.toLowerCase() === k)?.id; R.map[l] = m && plant(m) ? m : ''; } });
     R.status = 'ready'; recSave();
-  } catch (e) { R.status = 'error'; R.err = String(e?.message || e).slice(0, 180); recModel = null; }
+  } catch (e) { R.status = 'error'; R.err = String(e?.message || e).slice(0, 180); recModel = null; if (S.tab === 'scan') toast('Plant recognition did not load. Check your internet connection, then tap Retry.'); }
   if (S.sheet?.type === 'camsrc') renderSheet(); else if (S.tab === 'scan' && !S.sheet) render();
+}
+async function recEngine(){
+  const tf = window.tf; if (!tf?.setBackend) return '';
+  try { if (await tf.setBackend('webgl')){ await tf.ready(); return tf.getBackend(); } } catch (e) {}
+  try { await tf.setBackend('cpu'); await tf.ready(); } catch (e) {}
+  return tf.getBackend?.() || '';
 }
 function recReset(){ const R = S.rec; if (R.locked){ S.cam.marks = []; S.scan.sel = null; } R.locked = R.cand = R.dismissed = null; R.streak = R.misses = 0; }
 function recKick(){ if (!recLoop && S.rec.status === 'ready'){ recLoop = true; setTimeout(recTick, 100); } }
 async function recTick(){
   if (!(S.rec.status === 'ready' && recModel && stream && S.tab === 'scan' && !cur() && S.cam.src === 'live')){ recLoop = false; recReset(); return; }
+  let wait = REC_EVERY;
   if (!S.sheet && !S.scan.busy && S.scan.mode !== 'photo' && video.videoWidth){
-    const side = Math.min(video.videoWidth, video.videoHeight);
+    const side = Math.min(video.videoWidth, video.videoHeight), R = S.rec;
     try {
       recCanvas.getContext('2d').drawImage(video, (video.videoWidth - side) / 2, (video.videoHeight - side) / 2, side, side, 0, 0, 224, 224);
-      recUpdate(await recModel.predict(recCanvas));
+      const t0 = performance.now(), preds = await recModel.predict(recCanvas), d = performance.now() - t0;
+      R.ms = Math.round(R.ms ? R.ms * .7 + d * .3 : d);
+      recUpdate(preds);
     } catch (e) {}
+    wait = Math.max(REC_EVERY, R.ms * REC_GAP);
   }
-  setTimeout(recTick, REC_EVERY);
+  setTimeout(recTick, wait);
 }
 function recUpdate(preds){
   const R = S.rec, best = preds.reduce((a, b) => b.probability > a.probability ? b : a), id = R.map[best.className];
   const hit = id && plant(id) && best.probability >= REC_MIN ? id : null;
   if (hit && hit === R.cand) R.streak++; else { R.cand = hit; R.streak = hit ? 1 : 0; }
   R.misses = hit === R.locked && hit ? 0 : R.misses + 1;
-  if (hit && R.streak >= REC_STREAK && R.locked !== hit){
+  const slow = R.ms > 400, needHits = slow ? 2 : REC_STREAK, needMiss = slow ? 2 : REC_MISSES;
+  R.seen = `${best.className} ${Math.round(best.probability * 100)}%`;
+  if (!R.locked){ const h = document.querySelector('.cam-hint'); if (h && !S.scan.busy && S.scan.mode !== 'photo') h.textContent = `Looking for your plants · seeing ${R.seen}`; }
+  if (hit && R.streak >= needHits && R.locked !== hit){
     R.locked = hit; R.misses = 0; R.dismissed = null; S.cam.marks = [{x:50, y:54, id:hit, conf:best.probability}];
     S.scan.sel = S.scan.mode === 'identify' ? hit : null; render();
-  } else if (R.locked && R.misses >= REC_MISSES){
+  } else if (R.locked && R.misses >= needMiss){
     recReset(); S.cam.marks = []; S.scan.sel = null; render();
   } else if (R.locked && hit === R.locked){
     const el = document.querySelector('.mk-conf'); if (el) el.textContent = Math.round(best.probability * 100) + '%';
   }
 }
 (() => { try { const v = JSON.parse(localStorage.getItem('os-rec') || 'null'); if (v?.url){ S.rec.url = v.url; S.rec.map = v.map || {}; } } catch (e) {} })();
+
+// With a model set up, the camera only shows real recognition results. Returns true if it handled the tap.
+function recAct(){
+  const cm = S.cam, R = S.rec;
+  if (cm.src === 'sample' || !R.url) return false;
+  if (cm.src === 'photo'){ recPhoto(); return true; }
+  if (R.status !== 'ready'){ toast(R.status === 'error' ? 'Plant recognition did not load. Tap Retry, or check your internet connection.' : 'Plant recognition is still loading. Try again in a moment.'); return true; }
+  const id = R.locked;
+  if (!id) toast('No plant recognised yet. Point the camera at one of your plants.');
+  else if (S.scan.mode === 'diagnose') A.scanDx(id);
+  else { R.dismissed = null; S.scan.sel = id; render(); }
+  return true;
+}
+async function recPhoto(){
+  const R = S.rec;
+  if (R.status === 'loading') return toast('Plant recognition is still loading. Try again in a moment.');
+  if (R.status !== 'ready'){ toast('Loading plant recognition…'); await recLoad(R.url); if (R.status !== 'ready') return; }
+  const img = document.querySelector('.media img'); if (!img?.naturalWidth) return;
+  const side = Math.min(img.naturalWidth, img.naturalHeight);
+  recCanvas.getContext('2d').drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, 224, 224);
+  let preds; try { preds = await recModel.predict(recCanvas); } catch (e) { return toast('Could not check this photo.'); }
+  const best = preds.reduce((a, b) => b.probability > a.probability ? b : a), id = R.map[best.className];
+  if (!(id && plant(id) && best.probability >= .6)) return toast(`None of your plants recognised in this photo. Seeing ${best.className}.`);
+  S.cam.marks = [{x:50, y:54, id, conf:best.probability}];
+  if (S.scan.mode === 'diagnose') return A.scanDx(id);
+  S.scan.sel = id; render();
+}
 
 function enterScan(){ if (!S.cam.tried && S.cam.src === 'sample' && camPref()){ S.cam.src = 'live'; } S.cam.tried = true; }
 const BRACKET = `<svg viewBox="0 0 150 170" preserveAspectRatio="none" aria-hidden="true"><path d="${corners(2, 2, 148, 168, 24)}" stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>`;
@@ -1147,7 +1194,8 @@ function vQuestion(t){
 function vScan(){
   const sc = S.scan, cm = S.cam, real = cm.src !== 'sample', p = sc.sel && plant(sc.sel);
   const recOn = cm.src === 'live' && S.rec.status === 'ready', lk = recOn && S.rec.locked && plant(S.rec.locked);
-  const hint = sc.busy ? (sc.mode === 'diagnose' ? 'Checking for pests and disease…' : 'Identifying…') : recOn && sc.mode !== 'photo' ? (lk ? (sc.mode === 'diagnose' ? `Tap to check ${lk.name} for pests and disease` : `Recognised ${lk.name}`) : 'Looking for your plants…') : sc.mode === 'identify' ? 'Tap a plant, or aim at one and press the button' : sc.mode === 'diagnose' ? 'Tap a plant to check it for problems, or aim and press the button' : 'Press the button to save a photo to the garden album';
+  const recWait = cm.src === 'live' && S.rec.url && !recOn && sc.mode !== 'photo';
+  const hint = sc.busy ? (sc.mode === 'diagnose' ? 'Checking for pests and disease…' : 'Identifying…') : recWait ? (S.rec.status === 'error' ? 'Plant recognition did not load' : 'Loading plant recognition… the first time can take a few seconds') : cm.src === 'photo' && S.rec.url && sc.mode !== 'photo' ? 'Press the button to look for your plants in this photo' : recOn && sc.mode !== 'photo' ? (lk ? (sc.mode === 'diagnose' ? `Tap to check ${lk.name} for pests and disease` : `Recognised ${lk.name}`) : `Looking for your plants${S.rec.seen ? ' · seeing ' + S.rec.seen : '…'}`) : sc.mode === 'identify' ? 'Tap a plant, or aim at one and press the button' : sc.mode === 'diagnose' ? 'Tap a plant to check it for problems, or aim and press the button' : 'Press the button to save a photo to the garden album';
   const shut = {identify:['Identify the plant in the middle', I.search], diagnose:['Check the plant in the middle for problems', I.scanIc], photo:['Take a photo', '']}[sc.mode];
   const aim = sc.mode !== 'photo' && !sc.busy && !sc.sel && !(recOn && lk) && !(real && S.cam.marks.length);
   let pop = '';
@@ -1165,7 +1213,7 @@ function vScan(){
     ${aim ? `<div class="aim" aria-hidden="true"><svg viewBox="0 0 84 84"><path d="${corners(3, 3, 81, 81, 16)}" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M42 36v12M36 42h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>` : ''}
     <div class="cam-top"><button class="cam-chip" data-a="sheet:camsrc" aria-label="Change camera source"><i class="${cm.src === 'live' ? 'rec' : ''}"></i>${{sample:'Sample garden', live:'Live camera', photo:'Your photo'}[cm.src]}${I.down}</button><button class="cam-roll" data-a="sheet:photos" aria-label="Open photos"><span class="thumb">${thumbHTML(S.photos[0])}</span>${S.photos.length}</button></div>
     ${pop}
-    <div class="cam-bottom"><p class="cam-hint">${hint}</p>
+    <div class="cam-bottom">${recWait && S.rec.status === 'error' ? '<button class="btn sm" data-a="recRetry">Retry</button>' : ''}<p class="cam-hint">${hint}</p>
       <div class="seg">${[['identify','Identify'],['diagnose','Diagnose'],['photo','Photo']].map(m => `<button class="${sc.mode === m[0] ? 'on' : ''}" data-a="scanMode:${m[0]}">${m[1]}</button>`).join('')}</div>
       <button class="shutter" data-mode="${sc.mode}" data-a="shoot" aria-label="${shut[0]}" ${sc.busy ? 'disabled' : ''}>${shut[1]}</button></div>
     <div class="flash" id="flash"></div></div>`;
@@ -1403,7 +1451,7 @@ function sheetHTML(){
       <div class="card form"><div><p style="font-weight:700">Live plant recognition</p><p class="sub">Paste the link to a Teachable Machine image model trained on your plants. With the live camera on, the app names the plant in view a few times a second.</p></div>
         <form class="form" data-f="recLoad"><input id="rec-url" type="text" name="url" value="${esc(S.rec.url)}" placeholder="https://teachablemachine.withgoogle.com/models/…/" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Model link"><button class="btn block" type="submit" ${S.rec.status === 'loading' ? 'disabled' : ''}>${S.rec.status === 'loading' ? 'Loading model…' : S.rec.status === 'ready' ? 'Reload model' : 'Load model'}</button></form>
         ${S.rec.status === 'error' ? `<p class="banner" style="background:var(--alert-soft);color:var(--alert-ink)">${esc(S.rec.err)}</p>` : ''}
-        ${S.rec.status === 'ready' ? `<p class="sub">Model loaded with ${(S.rec.labels.length + ' classes')}. Choose which buddy each one opens.</p>${S.rec.labels.map((l, i) => `<label class="fld"><span>When it sees “${esc(l)}”</span><select id="rec-map-${i}" data-rec="${i}"><option value="">Ignore it</option>${recPool().map(p => `<option value="${p.id}" ${S.rec.map[l] === p.id ? 'selected' : ''}>${esc(p.name)} (${CARE[p.kind].species})</option>`).join('')}</select></label>`).join('')}<button class="btn ghost sm" data-a="recOff">Turn recognition off</button>` : ''}</div>
+        ${S.rec.status === 'ready' ? `<p class="sub">Model loaded with ${(S.rec.labels.length + ' classes')}${S.rec.engine ? ' · engine: ' + esc(S.rec.engine) : ''}${S.rec.ms ? ' · about ' + S.rec.ms + ' ms per check' : ''}. Choose which buddy each one opens.</p>${S.rec.labels.map((l, i) => `<label class="fld"><span>When it sees “${esc(l)}”</span><select id="rec-map-${i}" data-rec="${i}"><option value="">Ignore it</option>${recPool().map(p => `<option value="${p.id}" ${S.rec.map[l] === p.id ? 'selected' : ''}>${esc(p.name)} (${CARE[p.kind].species})</option>`).join('')}</select></label>`).join('')}<button class="btn ghost sm" data-a="recOff">Turn recognition off</button>` : ''}</div>
       <p class="sub">${S.rec.status === 'ready' ? 'Care details and diagnoses are still sample data for the buddy you link.' : 'Without a model, plant names and diagnoses are sample data and the brackets stay where you tap.'}</p>`]; }
     case 'soilvals': { const so = soilOf(sh.a), v = so.vals || {}; return ['Enter lab results', `<form class="form" data-f="soilVals:${sh.a}"><p class="sub">Copy the numbers from your lab report. Leave a box empty if the report does not include it.</p>
         <div class="fgrid">${Object.entries(SOIL_REF).map(([k, r]) => `<label class="fld"><span>${r.label}${r.unit ? ' (' + r.unit + ')' : ''}</span><input id="soil-${k}" type="number" name="${k}" step="${r.step}" min="0" inputmode="decimal" value="${v[k] ?? ''}" placeholder="${SOIL_SAMPLE[k]}"></label>`).join('')}</div>
@@ -1604,12 +1652,7 @@ const A = {
   wizLive(){ S.cam.src = 'live'; S.cam.marks = []; renderSheet(); },
   liveTap(){
     if (S.scan.busy) return;
-    if (S.cam.src === 'live' && S.rec.status === 'ready'){
-      const id = S.rec.locked;
-      if (!id) return toast('No plant recognised yet. Point the camera at one of your plants.');
-      if (S.scan.mode === 'diagnose') return A.scanDx(id);
-      S.rec.dismissed = null; S.scan.sel = id; return render();
-    }
+    if (recAct()) return;
     const r = $('.cam').getBoundingClientRect(), e = lastEvt;
     A.markAt((e.clientX - r.left) / r.width * 100, (e.clientY - r.top) / r.height * 100);
   },
@@ -1621,6 +1664,7 @@ const A = {
     render();
     setTimeout(() => { m.pending = false; if (S.tab === 'scan' && S.cam.marks.includes(m)){ S.scan.sel = id; render(); } }, 900);
   },
+  recRetry(){ recLoad(S.rec.url).then(recKick); },
   scanClose(){ S.scan.sel = null; if (S.rec.locked) S.rec.dismissed = S.rec.locked; render(); },
   recOff(){ S.rec.status = 'off'; S.rec.url = ''; S.rec.labels = []; S.rec.map = {}; recModel = null; recReset(); S.cam.marks = []; recSave(); renderSheet(); },
   scanTap(id){
@@ -1637,12 +1681,7 @@ const A = {
     const sc = S.scan, cm = S.cam;
     if (sc.busy) return;
     if (sc.mode === 'photo') return A.snap();
-    if (cm.src === 'live' && S.rec.status === 'ready'){
-      const id = S.rec.locked;
-      if (!id) return toast('No plant recognised yet. Point the camera at one of your plants.');
-      if (sc.mode === 'diagnose') return A.scanDx(id);
-      S.rec.dismissed = null; sc.sel = id; return render();
-    }
+    if (recAct()) return;
     if (cm.src !== 'sample'){
       const m = cm.marks[0];
       if (sc.mode === 'diagnose' && m && !m.pending) return A.scanDx(m.id);

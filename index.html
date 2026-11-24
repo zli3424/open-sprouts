@@ -380,6 +380,15 @@ textarea{min-height:88px;resize:vertical}
 .ico.s{background:var(--sun-soft);color:var(--sun-ink)}
 .ico.off{background:var(--surface-2);color:var(--ink-2)}
 
+/* Care timers and bulk updates */
+.cdb{display:inline-flex;align-items:center;gap:3px;margin-left:4px;padding:2px 7px;border-radius:999px;background:color-mix(in srgb,currentColor 18%,transparent);font-size:12px;font-variant-numeric:tabular-nums}
+.btn .cdb svg{width:13px;height:13px}
+.cdp{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);font-size:11px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+.cdp svg{width:12px;height:12px}
+.optrow .check{width:22px;height:22px;border-radius:7px;border:2px solid var(--line);display:grid;place-items:center;flex:none;color:var(--on-leaf)}
+.optrow.on .check{background:var(--leaf);border-color:var(--leaf)}
+.optrow .check svg{width:14px;height:14px}
+
 /* Sheets and toasts */
 #sheet-root{position:absolute;inset:0;pointer-events:none;z-index:10}
 #sheet-root>*{pointer-events:auto}
@@ -478,6 +487,8 @@ const I = {
   lab:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3M7.5 15h9"/></svg>',
   mail:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M4 7l8 6 8-6"/></svg>',
   gift:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="1.5"/><path d="M3 7h18v3H3zM12 7v13M12 7C10.5 4 7 3.5 7 5.8 7 7 10 7 12 7zM12 7c1.5-3 5-3.5 5-1.2C17 7 14 7 12 7z"/></svg>',
+  clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
+  list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l1.5 1.5L8 5M4 12l1.5 1.5L8 11M4 18l1.5 1.5L8 17M11 6h9M11 12h9M11 18h9"/></svg>',
   tBuddies:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14V8M12 9c0-3 2-5 5-5 0 3-2 5-5 5zM12 11c0-2-2-4-5-4 0 2 2 4 5 4z"/><path d="M6 14h12l-1.5 6h-9z"/></svg>',
   tGardens:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>',
   tCommunity:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h11a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H9l-4 3v-3H4z"/><path d="M17 9h3v9l-3-2h-5"/></svg>',
@@ -529,7 +540,7 @@ const MOOD = {
 const VTOP = {croton:26,sunflower:-14,tomato:6,pepper:6,rosemary:22,fern:24,basil:34,kale:32,succulent:44};
 const POTS = ['#C96B4B','#3D7EA6','#D99A1C','#8A68AB','#D2596C','#4F8F74'];
 const LEVELS = [['Seedling',0],['Sprout',250],['Gardener',750],['Grower',1500],['Master Farmer',3000]];
-const EARN = [['Answer a question',15],['Get an upvote on your answer',5],['Share a tip or post',10],['Log a garden task',10],['Help with a nearby alert',20],['Add and name a plant',20],['Complete a soil test',20],['Contribute to an initiative, plus 2 per item',10],['Sign up to help an initiative',10],['Help an initiative reach a goal',25],['Start an initiative',30],['Set up a garden',50]];
+const EARN = [['Answer a question',15],['Get an upvote on your answer',5],['Share a tip or post',10],['Water, feed or care for a plant (once an hour per plant)',10],['Help with a nearby alert',20],['Add and name a plant',20],['Complete a soil test',20],['Contribute to an initiative, plus 2 per item',10],['Sign up to help an initiative',10],['Help an initiative reach a goal',25],['Start an initiative',30],['Set up a garden',50]];
 
 /* ---------- soil testing (sample data) ---------- */
 const SOIL_STEPS = [
@@ -627,6 +638,11 @@ const INITS = [
     supporters:22, yours:0, mine:false, recent:[['li_wei','12 Kale','Yesterday'],['sam_seeds','20 Bok choy','2 d ago']]},
 ];
 
+/* ---------- care actions, points timer, bulk updates ---------- */
+const COOL_MS = 60 * 60 * 1000;   // a plant earns points for the same kind of care at most once an hour
+const ACTS = {water:['Watered', 'drop', 10], feed:['Fertilized', 'feed', 10], treat:['Treated', 'scanIc', 15], prune:['Pruned', 'tool', 10], pests:['Checked for pests', 'search', 10], harvest:['Harvested', 'tBuddies', 10]};
+const LOGKEY = {Watered:'water', Fertilized:'feed', Pruned:'prune', Weeded:'weed', Harvested:'harvest', 'Checked for pests':'pests'};
+
 /* ---------- live recognition settings ---------- */
 // Paste a Teachable Machine image model link here to load it for every viewer,
 // or leave it empty and paste the link in the app under Scan > camera source.
@@ -650,7 +666,7 @@ const S = {
   scan:{mode:'identify',sel:null,busy:null},
   cam:{src:'sample',photo:null,marks:[],n:0,blocked:false,tried:false},
   rec:{url:DEFAULT_MODEL_URL,status:'off',err:'',labels:[],map:{},cand:null,streak:0,misses:0,locked:null,dismissed:null},
-  mapSel:null, checks:{}, forumQ:'', soil:{}, inits:INITS,
+  mapSel:null, checks:{}, forumQ:'', soil:{}, inits:INITS, cool:{},
   user:{name:'Maya Chen',handle:'maya_grows',pts:860,xp:1445,answers:14,upvotes:63,tasks:27,
     history:[{n:15,why:'Answered a question about basil',when:'Yesterday'},{n:5,why:'Upvote from @dana_o',when:'Yesterday'},{n:10,why:'Watered Sunny',when:'Sunday'},{n:10,why:'Shared a tip',when:'Last week'}]},
   plants:[
@@ -1054,7 +1070,7 @@ function vBuddies(){
   const rank = {wilting:4,sick:3,thirsty:2,okay:1,thriving:0};
   const mine = S.plants.filter(p => p.mine && !p.unnamed).sort((a, b) => rank[mood(b)] - rank[mood(a)]);
   const hero = mine[0], hm = mood(hero), need = mine.filter(p => rank[mood(p)] >= 2).length, iss = issueOf(hero);
-  const act = iss === 'dry' ? `<button class="btn water sm" data-a="water:${hero.id}">${I.drop}Water now</button>`
+  const act = iss === 'dry' ? `<button class="btn water sm" data-a="water:${hero.id}">${I.drop}Water now${cdBtn(hero.id, 'water')}</button>`
     : iss ? `<button class="btn sm" data-a="diagnose:${hero.id}">${I.scanIc}Diagnose</button>` : '';
   return `<header class="lt"><div><p class="eyebrow">${todayStr}</p><h1>My buddies</h1></div><button class="iconbtn" data-a="tab:scan" aria-label="Add a plant by scanning it">${I.plus}</button></header>
   <section class="hero ${hm}">
@@ -1063,7 +1079,7 @@ function vBuddies(){
       <p class="bubble">${esc(guilt(hero))}</p>
       <div class="btnrow">${act}<button class="btn ghost sm" data-a="push:plant:${hero.id}">Open</button></div></div>
   </section>
-  <div class="sumrow"><span class="pill ${need ? 'sick' : 'thriving'} plain">${need === 1 ? '1 buddy needs you' : need ? need + ' buddies need you' : 'Everyone is happy'}</span><span class="pill okay plain">${mine.length - need} doing fine</span></div>
+  <div class="sumrow"><span class="pill ${need ? 'sick' : 'thriving'} plain">${need === 1 ? '1 buddy needs you' : need ? need + ' buddies need you' : 'Everyone is happy'}</span><span class="pill okay plain">${mine.length - need} doing fine</span><button class="btn ghost sm" data-a="bulk:mine" style="margin-left:auto">${I.list}Update several</button></div>
   <div class="grid2">${mine.slice(1).map(p => `<button class="bcard" data-a="push:plant:${p.id}">${plantSVG(p, 92)}<span class="n">${esc(p.name)}</span><span class="sub">${CARE[p.kind].species} · ${p.where === 'home' ? 'Home' : 'Riverside'}</span>${pill(mood(p))}</button>`).join('')}
     <button class="bcard" data-a="tab:scan" style="justify-content:center;align-items:center;border-style:dashed;min-height:150px"><span class="iconbtn">${I.plus}</span><span class="n">Add a buddy</span><span class="sub">Scan a plant to name it</span></button>
   </div>`;
@@ -1079,9 +1095,10 @@ function vPlant(id){
   const care = () => {
     const logs = S.log.filter(l => l.plant === p.id).slice(0, 3);
     return `<div class="sec" style="margin-top:14px"><div class="btnrow">
-        <button class="btn water" data-a="water:${p.id}">${I.drop}Water</button>
-        <button class="btn soft" data-a="feed:${p.id}">${I.feed}Feed</button>
-        <button class="btn ghost" data-a="diagnose:${p.id}">${I.scanIc}Diagnose</button></div></div>
+        <button class="btn water" data-a="water:${p.id}">${I.drop}Water${cdBtn(p.id, 'water')}</button>
+        <button class="btn soft" data-a="feed:${p.id}">${I.feed}Feed${cdBtn(p.id, 'feed')}</button>
+        <button class="btn ghost" data-a="diagnose:${p.id}">${I.scanIc}Diagnose</button></div>
+        ${['water', 'feed'].filter(a => coolLeft(p.id, a)).map(a => `<p class="sub" style="margin-top:8px">${I.clock.replace('<svg', '<svg width="13" height="13" style="display:inline;vertical-align:-2px"')} ${a === 'water' ? 'Watering' : 'Feeding'} points for ${esc(p.name)} come back in ${cdSpan(p.id, a)}. You can still log it before then.</p>`).join('')}</div>
       <div class="sec"><h2>Status <small>${MOOD[md].health}% health</small></h2><div class="list">
         <div class="meter"><span class="ic" style="background:var(--water-soft);color:var(--water-ink)">${I.drop}</span><div class="top"><span>Water</span><span>Watered ${whenText(p.last)} · ${waterText(p)}</span></div><div class="bar"><i style="width:${wf}%;background:var(--water)"></i></div></div>
         <div class="meter"><span class="ic" style="background:var(--sun-soft);color:var(--sun-ink)">${I.sun}</span><div class="top"><span>Sunlight</span><span>${esc(p.sun)} · ${c.hours}</span></div><div class="bar"><i style="width:${p.sun === 'Full sun' ? 90 : p.sun === 'Part shade' ? 60 : 30}%;background:var(--sun)"></i></div></div>
@@ -1252,6 +1269,19 @@ function iNeighbour(id){
   if (!S.sheet) render();
   iCelebrate(i, goals, true);
 }
+const coolLeft = (who, act) => Math.max(0, (S.cool[who + ':' + act] || 0) - Date.now());
+const fmtCd = ms => { const t = Math.ceil(ms / 1000); return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`; };
+const cdSpan = (who, act) => { const t = S.cool[who + ':' + act]; return t && t > Date.now() ? `<span data-cd="${t}">${fmtCd(t - Date.now())}</span>` : ''; };
+const cdBtn = (who, act) => { const c = cdSpan(who, act); return c ? `<span class="cdb" title="Points again when this reaches zero">${I.clock}${c}</span>` : ''; };
+function careReward(who, act){ if (coolLeft(who, act) > 0) return false; S.cool[who + ':' + act] = Date.now() + COOL_MS; return true; }
+function careEarn(p, act){
+  const [label, , pts] = ACTS[act];
+  if (careReward(p.id, act)) earn(pts, `${label} ${p.name}`);
+  else toast(`${label} ${p.name}. No points for that again until the timer ends: ${fmtCd(coolLeft(p.id, act))}`);
+}
+const bulkPool = scope => S.plants.filter(p => !p.unnamed && (scope === 'mine' ? p.mine : p.where === scope));
+const bulkDue = act => p => act === 'water' ? ['thirsty', 'wilting'].includes(mood(p)) : act === 'feed' ? p.fed >= 14 : act === 'treat' ? !!p.issue : false;
+function lastDone(p, label){ const l = S.log.find(x => x.plant === p.id && x.action === label); return l ? `Last ${label.toLowerCase()} ${whenText(l.days)}` : `Not ${label.toLowerCase()} yet`; }
 function logRow(l){
   const p = l.plant && plant(l.plant), water = l.action === 'Watered';
   const latest = water && p && S.log.find(x => x.plant === l.plant && x.action === 'Watered') === l;
@@ -1339,7 +1369,7 @@ function vGarden(id){
       ${g.role ? `<div class="fld" style="margin-top:12px"><span>Viewing as (demo switch)</span><div class="seg"><button class="${!sup ? 'on' : ''}" data-a="role:${g.id}:volunteer">Volunteer</button><button class="${sup ? 'on' : ''}" data-a="role:${g.id}:supervisor">Supervisor</button></div></div>`
         : `<div class="btnrow" style="margin-top:12px"><button class="btn" data-a="join:${g.id}">Join this garden</button></div><p class="sub" style="margin-top:8px">You are visiting. Join to log care and pick up jobs.</p>`}
     </div>
-    ${g.role ? `<div class="sec"><h2>Needs doing <small>${tasks.length} open</small></h2><div class="list">${tasks.length ? tasks.map(taskRow).join('') : '<div class="row sub">Nothing needs doing. The next volunteer can relax.</div>'}</div></div>` : ''}
+    ${g.role ? `<div class="sec"><h2><span>Needs doing <small>${tasks.length} open</small></span><button class="btn ghost sm" data-a="bulk:${g.id}">${I.list}Update several</button></h2><div class="list">${tasks.length ? tasks.map(taskRow).join('') : '<div class="row sub">Nothing needs doing. The next volunteer can relax.</div>'}</div></div>` : ''}
     <div class="sec"><h2>Already done ${g.role ? `<button class="btn sm" data-a="sheet:log:${g.id}">${I.plus}Log care</button>` : ''}</h2><div class="list">${logs.length ? logs.slice(0, 6).map(logRow).join('') : '<div class="row sub">No care logged yet.</div>'}</div></div>
     <div class="sec"><h2>Plants ${sup ? '<small>Tap Edit to change care</small>' : ''}</h2><div class="list">${ps.map(p => `<div class="row"><button data-a="push:plant:${p.id}" style="display:flex;gap:12px;align-items:center;flex:1;min-width:0">${plantSVG(p, 40)}<span class="grow"><span class="t">${esc(p.name)}</span><br><span class="sub">${CARE[p.kind].species} · every ${plural(p.every, 'day')} · ${esc(p.sun)}</span></span></button>${pill(mood(p))}${sup ? `<button class="btn ghost sm" data-a="sheet:edit:${p.id}">Edit</button>` : ''}</div>`).join('')}</div>
       ${sup ? `<div class="btnrow" style="margin-top:10px"><button class="btn ghost" data-a="setup">${I.scanIc}Rescan beds</button></div>` : ''}</div>
@@ -1488,6 +1518,20 @@ function sheetHTML(){
           ${sh.rewards.map((r, k) => `<div class="erow rw"><select id="ni-pct-${k}" data-bind="sheet.rewards.${k}.pct" aria-label="Goal ${k + 1}">${[25, 50, 75, 100].map(v => `<option value="${v}" ${+r.pct === v ? 'selected' : ''}>At ${v}%</option>`).join('')}</select><input id="ni-reward-${k}" type="text" data-bind="sheet.rewards.${k}.text" value="${esc(r.text)}" maxlength="60" placeholder="Reward" aria-label="Reward ${k + 1}">${del('rewards', k)}</div>`).join('')}
           <button type="button" class="btn ghost sm" data-a="niAdd:rewards" style="align-self:flex-start">${I.plus}Add a reward</button></div>
         <button class="btn block" type="submit">Start initiative<span class="pts" style="margin-left:6px">+30</span></button></form>`]; }
+    case 'bulk': {
+      const pool = bulkPool(sh.scope), [label, , per] = ACTS[sh.act], ok = p => sh.act !== 'treat' || !!p.issue;
+      const due = bulkDue(sh.act), info = p => sh.act === 'water' ? waterText(p) : sh.act === 'feed' ? `Last fed ${whenText(p.fed)}` : sh.act === 'treat' ? (p.issue ? ISSUES[p.issue].name : 'Nothing to treat') : lastDone(p, label);
+      const chosen = pool.filter(p => sh.sel[p.id] && ok(p)), pts = chosen.filter(p => !coolLeft(p.id, sh.act)).length * per;
+      const dueLabel = {water:'Select the thirsty ones', feed:'Select those due for feed', treat:'Select those with problems'}[sh.act];
+      return ['Update several plants', `<p class="sub">${sh.scope === 'mine' ? 'Your buddies' : esc(garden(sh.scope).name)}</p>
+        <div class="fld"><span>What did you do?</span><div class="chips">${Object.entries(ACTS).map(([k, a]) => `<button type="button" class="chip ${sh.act === k ? 'on' : ''}" data-a="bulkAct:${k}" aria-pressed="${sh.act === k}">${a[0]}</button>`).join('')}</div></div>
+        <div class="fld"><span>Which plants? ${chosen.length} selected</span>
+          <div class="btnrow" style="gap:6px"><button type="button" class="btn ghost sm" data-a="bulkSel:all">Select all</button>${dueLabel && pool.some(due) ? `<button type="button" class="btn ghost sm" data-a="bulkSel:due">${dueLabel}</button>` : ''}<button type="button" class="btn ghost sm" data-a="bulkSel:none">Clear</button></div>
+          <div class="list">${pool.map(p => { const on = !!sh.sel[p.id] && ok(p), cd = cdSpan(p.id, sh.act);
+            return `<button type="button" class="optrow ${on ? 'on' : ''}" data-a="bulkTog:${p.id}" aria-pressed="${on}" ${ok(p) ? '' : 'disabled'}><span class="check">${on ? I.check : ''}</span>${plantSVG(p, 34)}<span class="grow"><span class="t">${esc(p.name)}</span><br><span class="sub">${esc(info(p))}</span></span>${cd ? `<span class="cdp">${I.clock}${cd}</span>` : pill(mood(p))}</button>`; }).join('')}</div></div>
+        <label class="fld"><span>Note for the next person (optional)</span><textarea id="bulk-note" data-bind="sheet.note" style="min-height:56px" placeholder="For example, soil was still damp in bed 3">${esc(sh.note)}</textarea></label>
+        <button class="btn block" data-a="bulkGo" ${chosen.length ? '' : 'disabled'}>${chosen.length ? `Mark ${plural(chosen.length, 'plant')} as ${label.toLowerCase()}` : 'Select at least one plant'}${pts ? `<span class="pts" style="margin-left:6px">+${pts}</span>` : ''}</button>
+        <p class="sub">Each plant earns ${per} points for this at most once an hour. A clock shows how long until it can earn again; you can still update it.</p>`]; }
     case 'dx': return dxSheet(sh);
     case 'setup': return setupSheet(sh);
     case 'tour': return ['Demo guide', `<p class="sub">Everything here runs on sample data. Nothing is sent anywhere, and it resets when you reload.</p><div class="list">${[
@@ -1498,6 +1542,7 @@ function sheetHTML(){
       ['Name a new plant','Scan tab. Tap the bell pepper.','go:scan'],
       ['Plant moods, care steps and forum','Buddies tab. Open any plant.','go:buddies'],
       ['Soil test: sampling guide, labs and analysis','Buddies tab. Open a plant, then Soil test.','goSoil'],
+      ['Update several plants at once','Buddies tab or a garden page, Update several.','bulkDemo'],
       ['Shared garden log and jobs','Gardens tab. Open Riverside.','go:gardens:mine'],
       ['Supervisor setup with an AR scan','Gardens tab. Set up a new garden.','setup'],
       ['Map of nearby plant alerts','Gardens tab, Map.','go:gardens:map'],
@@ -1518,7 +1563,7 @@ function dxSheet(sh){
     <div><h3 style="font-size:17px;margin-bottom:8px">What to do</h3><ol class="fix">${d.fix.map(f => `<li><span>${f}</span></li>`).join('')}</ol></div>
     <div><h3 style="font-size:17px;margin-bottom:8px">Products that help</h3><div class="list">${d.products.map((pr, i) => `<div class="prod"><p style="font-weight:600">${pr[0]}</p><div class="stores">${pr[1].map((s, j) => `<button class="btn ghost sm" data-a="store:${key}:${i}:${j}">${esc(s[0])} · ${s[1]}</button>`).join('')}</div></div>`).join('')}</div>
       <p class="sub" style="margin-top:8px">Affiliate links. Open Sprouts earns a small commission when you buy. Prices are samples.</p></div>
-    ${key === 'dry' ? `<button class="btn water block" data-a="water:${p.id}">${I.drop}Water ${esc(name)} now</button>` : `<button class="btn block" data-a="treated:${p.id}">Mark as treated<span class="pts" style="margin-left:6px">+15</span></button>`}`];
+    ${key === 'dry' ? `<button class="btn water block" data-a="water:${p.id}">${I.drop}Water ${esc(name)} now${cdBtn(p.id, 'water')}</button>` : `<button class="btn block" data-a="treated:${p.id}">Mark as treated<span class="pts" style="margin-left:6px">+15</span></button>`}`];
 }
 function setupSheet(sh){
   const dots = `<div class="wsteps">${[0,1,2,3].map(i => `<i class="${i <= sh.step ? 'on' : ''}"></i>`).join('')}</div>`;
@@ -1603,13 +1648,34 @@ const A = {
   seg(k, v){ S.seg[k] = v; if (k === 'map') S.mapSel = null; render(); },
   close(){ S.sheet = null; render(); },
   sheet(type, a){ openSheet(type, a); },
+  bulk(scope){ const sel = {}; bulkPool(scope).filter(bulkDue('water')).forEach(p => sel[p.id] = true); openSheet('bulk', null, {scope, act:'water', sel, note:''}); },
+  bulkDemo(){ S.tab = 'buddies'; S.nav.buddies = []; S.sheet = null; render(); A.bulk('mine'); },
+  bulkAct(k){ S.sheet.act = k; renderSheet(); },
+  bulkTog(id){ const sel = S.sheet.sel; sel[id] = !sel[id]; renderSheet(); },
+  bulkSel(kind){ const sh = S.sheet, pool = bulkPool(sh.scope).filter(p => sh.act !== 'treat' || p.issue); sh.sel = {}; (kind === 'all' ? pool : kind === 'due' ? pool.filter(bulkDue(sh.act)) : []).forEach(p => sh.sel[p.id] = true); renderSheet(); },
+  bulkGo(){
+    const sh = S.sheet, act = sh.act, [label, , per] = ACTS[act], note = sh.note.trim();
+    const chosen = bulkPool(sh.scope).filter(p => sh.sel[p.id] && (act !== 'treat' || p.issue)); if (!chosen.length) return;
+    let pts = 0, timed = 0;
+    chosen.forEach(p => {
+      let action = label;
+      if (act === 'water') p.last = 0; else if (act === 'feed') p.fed = 0;
+      else if (act === 'treat'){ action = 'Treated for ' + ISSUES[p.issue].name.toLowerCase(); p.issue = null; }
+      S.log.unshift({g:p.where, plant:p.id, action, who:'You', days:0, note});
+      if (careReward(p.id, act)) pts += per; else timed++;
+    });
+    S.user.tasks += chosen.length; S.sheet = null; render();
+    const msg = `${label} ${plural(chosen.length, 'plant')}`;
+    if (pts) earn(pts, msg); else toast(msg);
+    if (timed) setTimeout(() => toast(`${plural(timed, 'plant')} still on the points timer, so no points for ${timed === 1 ? 'it' : 'those'} yet`), 800);
+  },
   water(id){
     const p = plant(id); p.last = 0;
     S.log.unshift({g:p.where, plant:id, action:'Watered', who:'You', days:0, note:''});
     S.user.tasks++; if (S.sheet) S.sheet = null;
-    render(); earn(10, `Watered ${p.name}`);
+    render(); careEarn(p, 'water');
   },
-  feed(id){ const p = plant(id); p.fed = 0; S.log.unshift({g:p.where, plant:id, action:'Fertilized', who:'You', days:0, note:''}); S.user.tasks++; render(); earn(10, `Fed ${p.name}`); },
+  feed(id){ const p = plant(id); p.fed = 0; S.log.unshift({g:p.where, plant:id, action:'Fertilized', who:'You', days:0, note:''}); S.user.tasks++; render(); careEarn(p, 'feed'); },
   goSoil(){ S.tab = 'buddies'; S.sheet = null; S.seg.plant = 'care'; S.nav.buddies = [{v:'plant', id:'bob'}, {v:'soil', id:'bob'}]; render(true); },
   soilStep(id, step){ soilOf(id).step = step; delete scrollMem[viewKey()]; render(); $('#screen').scrollTop = 0; },
   soilCheck(id, i){ const so = soilOf(id); so.checks[i] = !so.checks[i]; render(); },
@@ -1796,7 +1862,9 @@ const F = {
     if (p && action === 'Watered') p.last = 0;
     if (p && action === 'Fertilized') p.fed = 0;
     S.log.unshift({g:gid, plant:pid, action, who:'You', days:0, note:fd.get('note').trim()});
-    S.user.tasks++; S.sheet = null; render(); earn(10, 'Logged garden care');
+    S.user.tasks++; S.sheet = null; render();
+    const key = LOGKEY[action] || 'other', who = p ? p.id : gid;
+    if (careReward(who, key)) earn(10, 'Logged garden care'); else toast(`Saved to the log. No points for that again until the timer ends: ${fmtCd(coolLeft(who, key))}`);
   },
 };
 
@@ -1833,6 +1901,11 @@ function bind(e){
     document.getElementById(t.dataset.filter + '-empty').hidden = !!n;
   }
 }
+setInterval(() => {
+  let ended = false;
+  document.querySelectorAll('[data-cd]').forEach(el => { const r = +el.dataset.cd - Date.now(); if (r <= 0) ended = true; else el.textContent = fmtCd(r); });
+  if (ended){ if (S.sheet) renderSheet(); else render(); }
+}, 1000);
 document.addEventListener('input', bind);
 document.addEventListener('change', bind);
 render();

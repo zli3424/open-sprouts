@@ -680,7 +680,7 @@ const LOGKEY = {Watered:'water', Fertilized:'feed', Pruned:'prune', Weeded:'weed
 // or leave it empty and paste the link in the app under Scan > camera source.
 const DEFAULT_MODEL_URL = 'https://teachablemachine.withgoogle.com/models/v_-Zizx5l/';
 // Which buddy each class opens (class names matched without regard to case). Classes not listed open nothing.
-const DEFAULT_MODEL_MAP = {'herb':'herb', 'various plants':'', 'not detected':''};
+const DEFAULT_MODEL_MAP = {'herb':'herb', 'various plants':'', 'not detected':'', 'fake plant':''};
 const REC_MIN = 0.8, REC_STREAK = 3, REC_MISSES = 4, REC_EVERY = 300, REC_GAP = 2; // REC_GAP: free time left between checks, as a multiple of how long one check takes
 const REC_LIBS = [
   ['tf', ['https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js', 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js']],

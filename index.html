@@ -74,7 +74,7 @@ svg{display:block}
 
 /* Tab bar */
 .tabbar{flex:none;display:grid;grid-template-columns:repeat(5,1fr);background:var(--surface);border-top:1px solid var(--line);padding:6px 6px 14px}
-.tabbar button{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:600;color:var(--ink-2);padding:4px 0;border-radius:12px}
+.tabbar button{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:600;color:var(--ink-2);padding:4px 0;border-radius:12px}
 .tabbar button svg{width:24px;height:24px}
 .tabbar button.on{color:var(--leaf)}
 .tabbar button.scan span.ring{width:46px;height:46px;border-radius:50%;background:var(--leaf);color:var(--on-leaf);display:grid;place-items:center;margin-top:-18px;border:4px solid var(--surface)}
@@ -389,6 +389,36 @@ textarea{min-height:88px;resize:vertical}
 .optrow.on .check{background:var(--leaf);border-color:var(--leaf)}
 .optrow .check svg{width:14px;height:14px}
 
+/* Messages */
+.tbadge{position:absolute;top:0;left:calc(50% + 5px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--alert);color:#fff;font:700 11px/18px var(--body);text-align:center;border:2px solid var(--surface);box-sizing:content-box}
+.iconbtn{position:relative}
+.iconbtn .tbadge{top:-4px;left:auto;right:-4px}
+.ubadge{min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--leaf);color:var(--on-leaf);font:700 12px/20px var(--body);text-align:center;flex:none}
+.crow{display:flex;align-items:center;gap:12px;padding:12px 14px;width:100%;border-top:1px solid var(--line)}
+.crow:first-child{border-top:0}
+.crow .grow{flex:1;min-width:0}
+.crow .snip{color:var(--ink-2);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crow.unread .snip{color:var(--ink);font-weight:600}
+.avatar.grp{background:var(--water-soft);color:var(--water-ink)}
+.avatar.grp svg{width:18px;height:18px}
+.screen.is-chat{display:flex;flex-direction:column;padding-bottom:0}
+.screen.is-chat>.chat{flex:1;display:flex;flex-direction:column}
+.msgs{flex:1;display:flex;flex-direction:column;gap:4px;padding:12px 14px 16px}
+.msg{max-width:80%;padding:9px 13px;border-radius:19px;line-height:1.35;overflow-wrap:anywhere;white-space:pre-wrap}
+.msg.them{align-self:flex-start;background:var(--surface);border:1px solid var(--line);border-bottom-left-radius:6px}
+.msg.me{align-self:flex-end;background:var(--leaf);color:var(--on-leaf);border-bottom-right-radius:6px}
+.msg-who{font-size:12px;font-weight:700;color:var(--ink-2);margin:8px 0 0 6px}
+.msg-time{align-self:center;font-size:12px;font-weight:600;color:var(--ink-2);margin:10px 0 4px}
+.typing{display:inline-flex;gap:4px;align-items:center;height:20px}
+.typing i{width:7px;height:7px;border-radius:50%;background:var(--ink-2);animation:tdot 1s ease-in-out infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes tdot{0%,80%,100%{opacity:.3;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+.composer{position:sticky;bottom:0;display:flex;gap:8px;align-items:center;padding:10px 12px 12px;background:var(--bg);border-top:1px solid var(--line)}
+.composer input{flex:1;min-width:0;height:44px;border-radius:22px;border:1px solid var(--line);background:var(--surface);padding:0 16px;font-size:16px}
+.sendbtn{width:44px;height:44px;border-radius:50%;background:var(--leaf);color:var(--on-leaf);display:grid;place-items:center;flex:none}
+.sendbtn svg{width:20px;height:20px}
+.chat-intro{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;padding:18px 20px 6px}
+
 /* Sheets and toasts */
 #sheet-root{position:absolute;inset:0;pointer-events:none;z-index:10}
 #sheet-root>*{pointer-events:auto}
@@ -489,6 +519,8 @@ const I = {
   gift:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="1.5"/><path d="M3 7h18v3H3zM12 7v13M12 7C10.5 4 7 3.5 7 5.8 7 7 10 7 12 7zM12 7c1.5-3 5-3.5 5-1.2C17 7 14 7 12 7z"/></svg>',
   clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
   list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l1.5 1.5L8 5M4 12l1.5 1.5L8 11M4 18l1.5 1.5L8 17M11 6h9M11 12h9M11 18h9"/></svg>',
+  chat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4.2A8 8 0 1 1 20 12z"/></svg>',
+  send:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l16-8-6 16-2.5-6.5z"/><path d="M11.5 13.5L20 4"/></svg>',
   tBuddies:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14V8M12 9c0-3 2-5 5-5 0 3-2 5-5 5zM12 11c0-2-2-4-5-4 0 2 2 4 5 4z"/><path d="M6 14h12l-1.5 6h-9z"/></svg>',
   tGardens:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>',
   tCommunity:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h11a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H9l-4 3v-3H4z"/><path d="M17 9h3v9l-3-2h-5"/></svg>',
@@ -667,6 +699,20 @@ const S = {
   cam:{src:'sample',photo:null,marks:[],n:0,blocked:false,tried:false},
   rec:{url:DEFAULT_MODEL_URL,status:'off',err:'',labels:[],map:{},cand:null,streak:0,misses:0,locked:null,dismissed:null},
   mapSel:null, checks:{}, forumQ:'', soil:{}, inits:INITS, cool:{},
+  chats:[
+    {id:'dm:Dana Okafor', kind:'dm', name:'Dana Okafor', unread:1, draft:'', msgs:[
+      {from:'Dana Okafor', text:'Hi Maya! Tom spotted aphids on Kale-b. Could you take a look next time you are in?', at:-26 * 60},
+      {from:'me', text:'Will do. I can bring the soap spray on Saturday.', at:-25 * 60},
+      {from:'Dana Okafor', text:'Perfect, thank you. There is a spray bottle on the top shelf in the shed, and please log it so the next person knows.', at:-95}]},
+    {id:'g:g1', kind:'group', g:'g1', unread:2, draft:'', msgs:[
+      {from:'Priya Raman', text:'I can take the compost on Saturday if someone brings gloves.', at:-30 * 60},
+      {from:'me', text:'I have a spare pair, I will drop them in the shed.', at:-29 * 60},
+      {from:'Tom Kowalski', text:'Watered beds 1 and 2 this morning. Bob in bed 3 did not need it.', at:-170},
+      {from:'Sam Idowu', text:'Anyone have a taller stake for Sunny? Wind is picking up this weekend.', at:-40}]},
+    {id:'dm:Priya Raman', kind:'dm', name:'Priya Raman', unread:0, draft:'', msgs:[
+      {from:'Priya Raman', text:'Thanks for the basil tip on the forum, it worked.', at:-3 * 24 * 60},
+      {from:'me', text:'Glad it helped!', at:-3 * 24 * 60 + 5}]},
+  ],
   user:{name:'Maya Chen',handle:'maya_grows',pts:860,xp:1445,answers:14,upvotes:63,tasks:27,
     history:[{n:15,why:'Answered a question about basil',when:'Yesterday'},{n:5,why:'Upvote from @dana_o',when:'Yesterday'},{n:10,why:'Watered Sunny',when:'Sunday'},{n:10,why:'Shared a tip',when:'Last week'}]},
   plants:[
@@ -1105,6 +1151,7 @@ function vPlant(id){
         <div class="meter"><span class="ic" style="background:var(--leaf-soft);color:var(--leaf-ink)">${I.feed}</span><div class="top"><span>Soil and feed</span><span>${esc(p.soil)}</span></div><div class="sub" style="grid-column:2">${esc(p.fert)} · last fed ${whenText(p.fed)}</div></div>
         ${iss ? `<button class="row" data-a="diagnose:${p.id}"><span class="pill sick plain">${ISSUES[iss].name}</span><span class="grow sub">Tap to see how to fix it</span>${I.chev}</button>` : ''}
         <button class="row" data-a="push:soil:${p.id}"><span class="avatar" style="border-radius:11px;width:28px;height:28px">${I.lab.replace('<svg','<svg width="16" height="16"')}</span><span class="grow"><span class="t">Soil test</span><br><span class="sub">${S.soil[p.id]?.vals ? `Tested · pH ${S.soil[p.id].vals.ph} · tap for the full report` : S.soil[p.id]?.status === 'sent' ? 'Sample is at the lab' : 'Learn to take a sample, find a lab, get it analysed'}</span></span>${I.chev}</button>
+        ${p.where !== 'home' && garden(p.where).sup !== S.user.name ? `<button class="row" data-a="chat:dm:${esc(garden(p.where).sup)}:${p.id}"><span class="avatar" style="border-radius:11px;width:28px;height:28px">${I.chat.replace('<svg','<svg width="16" height="16"')}</span><span class="grow"><span class="t">Ask ${esc(firstName(garden(p.where).sup))} about ${esc(p.name)}</span><br><span class="sub">Message the supervisor of ${esc(garden(p.where).name)}</span></span>${I.chev}</button>` : ''}
       </div>${p.note ? `<p class="banner" style="margin-top:10px">Supervisor note: ${esc(p.note)}</p>` : ''}</div>
       <div class="sec"><h2>How to look after ${esc(p.name)}</h2><div class="list">${c.steps.map((s, i) => {
         const done = S.checks[p.id + i];
@@ -1282,6 +1329,89 @@ function careEarn(p, act){
 const bulkPool = scope => S.plants.filter(p => !p.unnamed && (scope === 'mine' ? p.mine : p.where === scope));
 const bulkDue = act => p => act === 'water' ? ['thirsty', 'wilting'].includes(mood(p)) : act === 'feed' ? p.fed >= 14 : act === 'treat' ? !!p.issue : false;
 function lastDone(p, label){ const l = S.log.find(x => x.plant === p.id && x.action === label); return l ? `Last ${label.toLowerCase()} ${whenText(l.days)}` : `Not ${label.toLowerCase()} yet`; }
+/* ---------- messages (sample data, replies are simulated) ---------- */
+const firstName = n => String(n).split(' ')[0];
+const unreadTotal = () => S.chats.reduce((a, c) => a + c.unread, 0);
+const chatById = id => S.chats.find(c => c.id === id);
+const msgAt = m => m.at > 1e12 ? m.at : Date.now() + m.at * 60000;   // sample messages store minutes ago (negative)
+function personRole(name){
+  for (const g of S.gardens){ if (g.sup === name) return ['Supervisor', g]; }
+  for (const g of S.gardens){ const m = g.people.find(x => x[0] === name); if (m) return [m[1], g]; }
+  return ['Member', null];
+}
+const chatTitle = c => c.kind === 'group' ? garden(c.g).name : c.name;
+const chatSub = c => { if (c.kind === 'group') return `Group chat · ${plural(garden(c.g).people.length, 'member')}`; const [role, g] = personRole(c.name); return g ? `${role} · ${g.name}` : role; };
+const chatAvatar = c => c.kind === 'group' ? `<span class="avatar grp">${I.tCommunity}</span>` : `<span class="avatar">${initials(c.name)}</span>`;
+function chatGet(kind, key){
+  const id = (kind === 'group' ? 'g:' : 'dm:') + key;
+  let c = chatById(id);
+  if (!c){ c = kind === 'group' ? {id, kind:'group', g:key, unread:0, draft:'', msgs:[]} : {id, kind:'dm', name:key, unread:0, draft:'', msgs:[]}; S.chats.push(c); }
+  return c;
+}
+function msgWhen(t){
+  const d = new Date(t), now = new Date(), days = Math.round((new Date(now.toDateString()) - new Date(d.toDateString())) / 86400000);
+  const hm = d.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+  return days === 0 ? hm : days === 1 ? 'Yesterday' : days < 7 ? DAYS[d.getDay()] : `${MONTHS[d.getMonth()].slice(0, 3)} ${d.getDate()}`;
+}
+function vInbox(){
+  const list = [...S.chats].filter(c => c.msgs.length).sort((a, b) => msgAt(b.msgs[b.msgs.length - 1]) - msgAt(a.msgs[a.msgs.length - 1]));
+  return navBar('Messages', `<button class="iconbtn" data-a="sheet:newmsg" aria-label="New message">${I.pencil}</button>`) + `<div class="sec" style="margin-top:14px">
+    <div class="list">${list.map(c => { const last = c.msgs[c.msgs.length - 1], who = last.from === 'me' ? 'You: ' : c.kind === 'group' ? firstName(last.from) + ': ' : '';
+      return `<button class="crow ${c.unread ? 'unread' : ''}" data-a="chatOpen:${esc(c.id)}">${chatAvatar(c)}<span class="grow"><span class="gtop"><span class="t">${esc(chatTitle(c))}</span><span class="sub">${msgWhen(msgAt(last))}</span></span><span class="sub" style="display:block">${esc(chatSub(c))}</span><span class="snip" style="display:block">${c.typing ? 'typing…' : esc(who + last.text)}</span></span>${c.unread ? `<span class="ubadge">${c.unread}</span>` : ''}</button>`; }).join('') || '<div class="row sub">No messages yet.</div>'}</div>
+    <button class="btn ghost block" data-a="sheet:newmsg" style="margin-top:12px">${I.pencil}New message</button>
+    <p class="sub" style="margin-top:10px">Message anyone in a garden you have joined, or the supervisor of any garden. In this demo, people and their replies are sample data.</p></div>`;
+}
+function chatMsgsHTML(c){
+  let html = '', lastT = 0, lastFrom = '';
+  c.msgs.forEach(m => {
+    const t = msgAt(m);
+    if (t - lastT > 60 * 60000){ html += `<p class="msg-time">${msgWhen(t)}${msgWhen(t).includes(':') ? '' : ' · ' + new Date(t).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}</p>`; lastFrom = ''; }
+    if (c.kind === 'group' && m.from !== 'me' && m.from !== lastFrom) html += `<p class="msg-who">${esc(m.from)}</p>`;
+    html += `<p class="msg ${m.from === 'me' ? 'me' : 'them'}">${esc(m.text)}</p>`;
+    lastT = t; lastFrom = m.from;
+  });
+  if (c.typing){ if (c.kind === 'group' && c.typing !== lastFrom) html += `<p class="msg-who">${esc(c.typing)}</p>`; html += `<p class="msg them" aria-label="${esc(firstName(c.typing))} is typing"><span class="typing"><i></i><i></i><i></i></span></p>`; }
+  return html || '<p class="msg-time">No messages yet. Say hello.</p>';
+}
+// Update only the message list, so the message box keeps its text, focus and the phone keyboard
+function refreshChat(c){
+  const box = document.querySelector('#screen .msgs'); if (!box) return render();
+  c.unread = 0; box.innerHTML = chatMsgsHTML(c); const scr = $('#screen'); scr.scrollTop = scr.scrollHeight;
+}
+function vChat(id){
+  const c = chatById(id); c.unread = 0;
+  return navBar(chatTitle(c)) + `<div class="chat"><div class="chat-intro">${chatAvatar(c).replace('class="avatar', 'class="avatar lg')}<p style="font-weight:700;font-size:17px">${esc(chatTitle(c))}</p><p class="sub">${esc(chatSub(c))}</p></div>
+    <div class="msgs" aria-live="polite">${chatMsgsHTML(c)}</div>
+    <form class="composer" data-f="msg:${esc(c.id)}"><input id="msg-text" name="text" type="text" autocomplete="off" maxlength="500" placeholder="Message ${esc(c.kind === 'group' ? 'the group' : firstName(c.name))}" value="${esc(c.draft)}" data-draft="${esc(c.id)}" aria-label="Message"><button class="sendbtn" type="submit" aria-label="Send">${I.send}</button></form></div>`;
+}
+function chatReply(c, text){
+  const g = c.kind === 'group' ? garden(c.g) : personRole(c.name)[1];
+  const others = c.kind === 'group' ? garden(c.g).people.map(m => m[0]).filter(n => n !== S.user.name) : [c.name];
+  const who = others[Math.floor(Math.random() * others.length)] || c.name, sup = g && g.sup === who, t = text.toLowerCase(), boss = g ? firstName(g.sup) : 'the supervisor';
+  const ask = /\?\s*$/.test(t);
+  const r = ask && /spray|shed|tool|glove|hose|stake|shears|bucket|key/.test(t) ? 'Yes, it should be in the shed, top shelf on the left. Let me know if it is missing.'
+    : /water|thirst|dry|droop/.test(t) ? 'Thanks! Log it in the app so nobody waters it twice.'
+    : /aphid|pest|bug|blight|sick|spot|mildew|spray|disease/.test(t) ? 'Good catch. The soap spray is on the top shelf in the shed. Can you send a photo next time you are there?'
+    : /shift|saturday|sunday|weekend|tomorrow|today|tonight|when|time|schedule/.test(t) ? (sup ? 'Saturday 9 to 12 works. I will put you on the schedule.' : 'I am there Saturday morning if you want to team up.')
+    : /join|volunteer|sign up|new here/.test(t) ? (sup ? 'You would be very welcome. Tap Join on the garden page and come by any Saturday morning.' : `Come by on Saturday. ${boss} will show you around.`)
+    : /thank/.test(t) ? 'Anytime. See you at the garden.'
+    : /\?\s*$/.test(t) ? (sup ? 'Good question. Let me check and get back to you tonight.' : `Not sure, to be honest. ${boss} would know.`)
+    : sup ? 'Got it, thanks for the update.' : 'Sounds good!';
+  return [who, r];
+}
+function chatSend(c, text){
+  c.msgs.push({from:'me', text, at:Date.now()}); c.draft = '';
+  const viewing = () => cur()?.v === 'chat' && cur().id === c.id && !S.sheet;
+  const el = document.getElementById('msg-text'); if (el) el.value = '';
+  refreshChat(c);
+  const [who, reply] = chatReply(c, text);
+  setTimeout(() => { c.typing = who; if (viewing()) refreshChat(c); else if (cur()?.v === 'inbox' && !S.sheet) render(); }, 900);
+  setTimeout(() => {
+    c.typing = null; c.msgs.push({from:who, text:reply, at:Date.now()});
+    if (viewing()) refreshChat(c);
+    else { c.unread++; toast(`New message from ${firstName(who)}`); if (cur()?.v === 'inbox' && !S.sheet) render(); else renderTabs(); }
+  }, 900 + Math.min(3200, 1300 + reply.length * 18));
+}
 function logRow(l){
   const p = l.plant && plant(l.plant), water = l.action === 'Watered';
   const latest = water && p && S.log.find(x => x.plant === l.plant && x.action === 'Watered') === l;
@@ -1323,7 +1453,7 @@ function vGardens(){
         <div class="btnrow"><button class="btn ghost sm" data-a="push:garden:${g.id}">Look around</button>${g.role ? '<button class="btn soft sm" disabled>Joined</button>' : `<button class="btn sm" data-a="join:${g.id}">Join garden</button>`}</div></div>`;
     }).join('')}</div>`;
   } else body = vMap();
-  return `<header class="lt"><div><p class="eyebrow">Community gardens</p><h1>Gardens</h1></div></header>
+  return `<header class="lt"><div><p class="eyebrow">Community gardens</p><h1>Gardens</h1></div><button class="iconbtn" data-a="inbox" aria-label="Messages${unreadTotal() ? ', ' + unreadTotal() + ' unread' : ''}">${I.chat}${unreadTotal() ? `<span class="tbadge">${unreadTotal()}</span>` : ''}</button></header>
     <div class="pad" style="margin-bottom:14px"><div class="seg">${[['mine','My gardens'],['explore','Explore'],['map','Map']].map(m => `<button class="${seg === m[0] ? 'on' : ''}" data-a="seg:gardens:${m[0]}">${m[1]}</button>`).join('')}</div></div>${body}`;
 }
 
@@ -1368,12 +1498,13 @@ function vGarden(id){
       <p class="sub" style="margin-top:4px">${plural(g.beds, 'bed')} · ${plural(ps.length, 'plant')} · run by ${esc(g.sup)} · ${g.dist}</p>
       ${g.role ? `<div class="fld" style="margin-top:12px"><span>Viewing as (demo switch)</span><div class="seg"><button class="${!sup ? 'on' : ''}" data-a="role:${g.id}:volunteer">Volunteer</button><button class="${sup ? 'on' : ''}" data-a="role:${g.id}:supervisor">Supervisor</button></div></div>`
         : `<div class="btnrow" style="margin-top:12px"><button class="btn" data-a="join:${g.id}">Join this garden</button></div><p class="sub" style="margin-top:8px">You are visiting. Join to log care and pick up jobs.</p>`}
+      <div class="btnrow" style="margin-top:10px">${g.sup !== S.user.name ? `<button class="btn ghost sm" data-a="chat:dm:${esc(g.sup)}" aria-label="Message ${esc(g.sup)}, the supervisor">${I.chat}Message ${esc(firstName(g.sup))}</button>` : ''}${g.role ? `<button class="btn ghost sm" data-a="chat:group:${g.id}">${I.tCommunity}Group chat</button>` : ''}</div>
     </div>
     ${g.role ? `<div class="sec"><h2><span>Needs doing <small>${tasks.length} open</small></span><button class="btn ghost sm" data-a="bulk:${g.id}">${I.list}Update several</button></h2><div class="list">${tasks.length ? tasks.map(taskRow).join('') : '<div class="row sub">Nothing needs doing. The next volunteer can relax.</div>'}</div></div>` : ''}
     <div class="sec"><h2>Already done ${g.role ? `<button class="btn sm" data-a="sheet:log:${g.id}">${I.plus}Log care</button>` : ''}</h2><div class="list">${logs.length ? logs.slice(0, 6).map(logRow).join('') : '<div class="row sub">No care logged yet.</div>'}</div></div>
     <div class="sec"><h2>Plants ${sup ? '<small>Tap Edit to change care</small>' : ''}</h2><div class="list">${ps.map(p => `<div class="row"><button data-a="push:plant:${p.id}" style="display:flex;gap:12px;align-items:center;flex:1;min-width:0">${plantSVG(p, 40)}<span class="grow"><span class="t">${esc(p.name)}</span><br><span class="sub">${CARE[p.kind].species} · every ${plural(p.every, 'day')} · ${esc(p.sun)}</span></span></button>${pill(mood(p))}${sup ? `<button class="btn ghost sm" data-a="sheet:edit:${p.id}">Edit</button>` : ''}</div>`).join('')}</div>
       ${sup ? `<div class="btnrow" style="margin-top:10px"><button class="btn ghost" data-a="setup">${I.scanIc}Rescan beds</button></div>` : ''}</div>
-    <div class="sec"><h2>People</h2><div class="list">${g.people.map(m => `<div class="row"><span class="avatar ${m[1] === 'You' ? 'me' : ''}">${initials(m[0])}</span><span class="grow t">${esc(m[0])}</span><span class="sub">${m[1]}</span></div>`).join('')}</div>
+    <div class="sec"><h2>People</h2><div class="list">${g.people.map(m => `<div class="row"><span class="avatar ${m[1] === 'You' ? 'me' : ''}">${initials(m[0])}</span><span class="grow"><span class="t">${esc(m[0])}</span><br><span class="sub">${m[1]}</span></span>${m[1] !== 'You' && (g.role || m[1] === 'Supervisor') ? `<button class="btn ghost sm" data-a="chat:dm:${esc(m[0])}" aria-label="Message ${esc(m[0])}">${I.chat}Message</button>` : ''}</div>`).join('')}</div>
       ${sup && g.code ? `<p class="banner" style="margin-top:10px">Invite code for volunteers: ${g.code}</p>` : ''}</div>`;
 }
 
@@ -1532,6 +1663,13 @@ function sheetHTML(){
         <label class="fld"><span>Note for the next person (optional)</span><textarea id="bulk-note" data-bind="sheet.note" style="min-height:56px" placeholder="For example, soil was still damp in bed 3">${esc(sh.note)}</textarea></label>
         <button class="btn block" data-a="bulkGo" ${chosen.length ? '' : 'disabled'}>${chosen.length ? `Mark ${plural(chosen.length, 'plant')} as ${label.toLowerCase()}` : 'Select at least one plant'}${pts ? `<span class="pts" style="margin-left:6px">+${pts}</span>` : ''}</button>
         <p class="sub">Each plant earns ${per} points for this at most once an hour. A clock shows how long until it can earn again; you can still update it.</p>`]; }
+    case 'newmsg': {
+      const mine = S.gardens.filter(g => g.role), others = S.gardens.filter(g => !g.role && g.sup !== S.user.name);
+      const row = (kind, key, title, sub, av) => `<button class="crow" data-a="chat:${kind}:${esc(key)}">${av}<span class="grow"><span class="t">${esc(title)}</span><br><span class="sub">${esc(sub)}</span></span>${I.chev}</button>`;
+      return ['New message', `${mine.map(g => `<div class="fld"><span>${esc(g.name)}</span><div class="list">
+          ${row('group', g.id, 'Group chat', plural(g.people.length, 'member'), `<span class="avatar grp">${I.tCommunity}</span>`)}
+          ${g.people.filter(m => m[0] !== S.user.name).map(m => row('dm', m[0], m[0], g.sup === m[0] ? 'Supervisor' : m[1], `<span class="avatar">${initials(m[0])}</span>`)).join('')}</div></div>`).join('')}
+        ${others.length ? `<div class="fld"><span>Supervisors of other gardens</span><div class="list">${others.map(g => row('dm', g.sup, g.sup, 'Supervisor · ' + g.name, `<span class="avatar">${initials(g.sup)}</span>`)).join('')}</div></div>` : ''}`]; }
     case 'dx': return dxSheet(sh);
     case 'setup': return setupSheet(sh);
     case 'tour': return ['Demo guide', `<p class="sub">Everything here runs on sample data. Nothing is sent anywhere, and it resets when you reload.</p><div class="list">${[
@@ -1543,6 +1681,7 @@ function sheetHTML(){
       ['Plant moods, care steps and forum','Buddies tab. Open any plant.','go:buddies'],
       ['Soil test: sampling guide, labs and analysis','Buddies tab. Open a plant, then Soil test.','goSoil'],
       ['Update several plants at once','Buddies tab or a garden page, Update several.','bulkDemo'],
+      ['Message your garden or its supervisor','Gardens tab, then the message button at the top.','inboxDemo'],
       ['Shared garden log and jobs','Gardens tab. Open Riverside.','go:gardens:mine'],
       ['Supervisor setup with an AR scan','Gardens tab. Set up a new garden.','setup'],
       ['Map of nearby plant alerts','Gardens tab, Map.','go:gardens:map'],
@@ -1595,19 +1734,23 @@ const scrollMem = {}; let lastKey = '';
 const viewKey = () => { const t = cur(); return S.tab + (t ? `/${t.v}/${t.id}/${t.x || ''}` : ''); };
 function viewHTML(){
   const t = cur();
-  if (t) switch (t.v){ case 'plant': return vPlant(t.id); case 'q': return vQuestion(t); case 'garden': return vGarden(t.id); case 'post': return vPost(t.id); case 'soil': return vSoil(t.id); case 'init': return vInit(t.id); }
+  if (t) switch (t.v){ case 'plant': return vPlant(t.id); case 'q': return vQuestion(t); case 'garden': return vGarden(t.id); case 'post': return vPost(t.id); case 'soil': return vSoil(t.id); case 'init': return vInit(t.id); case 'inbox': return vInbox(); case 'chat': return vChat(t.id); }
   return {buddies:vBuddies, gardens:vGardens, scan:vScan, community:vCommunity, profile:vProfile}[S.tab]();
 }
 function render(enter){
   const scr = $('#screen'), key = viewKey(), cam = S.tab === 'scan' && !cur();
   if (lastKey) scrollMem[lastKey] = scr.scrollTop;
-  scr.className = 'screen' + (cam ? ' is-cam' : '') + (enter ? ' enter' : '');
+  const chatView = cur()?.v === 'chat';
+  scr.className = 'screen' + (cam ? ' is-cam' : '') + (chatView ? ' is-chat' : '') + (enter ? ' enter' : '');
   scr.innerHTML = viewHTML();
-  scr.scrollTop = scrollMem[key] || 0;
+  scr.scrollTop = chatView ? scr.scrollHeight : scrollMem[key] || 0;
   lastKey = key;
   $('#phone').classList.toggle('cammode', cam);
-  $('#tabbar').innerHTML = TABS.map(t => `<button class="${t[0] === 'scan' ? 'scan ' : ''}${S.tab === t[0] ? 'on' : ''}" data-a="tab:${t[0]}" ${S.tab === t[0] ? 'aria-current="page"' : ''}>${t[0] === 'scan' ? `<span class="ring">${t[2]}</span>` : t[2]}${t[1]}</button>`).join('');
+  renderTabs();
   renderSheet();
+}
+function renderTabs(){
+  $('#tabbar').innerHTML = TABS.map(t => `<button class="${t[0] === 'scan' ? 'scan ' : ''}${S.tab === t[0] ? 'on' : ''}" data-a="tab:${t[0]}" ${S.tab === t[0] ? 'aria-current="page"' : ''}>${t[0] === 'scan' ? `<span class="ring">${t[2]}</span>` : t[2]}${t[1]}${t[0] === 'gardens' && unreadTotal() ? `<span class="tbadge" aria-label="${unreadTotal()} unread messages">${unreadTotal()}</span>` : ''}</button>`).join('');
 }
 function renderSheet(){
   const r = $('#sheet-root');
@@ -1648,6 +1791,14 @@ const A = {
   seg(k, v){ S.seg[k] = v; if (k === 'map') S.mapSel = null; render(); },
   close(){ S.sheet = null; render(); },
   sheet(type, a){ openSheet(type, a); },
+  inbox(){ S.sheet = null; S.nav[S.tab].push({v:'inbox'}); render(true); },
+  inboxDemo(){ S.sheet = null; S.tab = 'gardens'; S.nav.gardens = [{v:'inbox'}]; render(); },
+  chatOpen(...parts){ S.sheet = null; S.nav[S.tab].push({v:'chat', id:parts.join(':')}); render(true); },
+  chat(kind, key, pid){
+    const c = chatGet(kind, key); if (pid && plant(pid) && !c.draft) c.draft = `About ${plant(pid).name}: `;
+    S.sheet = null; S.nav[S.tab].push({v:'chat', id:c.id}); render(true);
+    if (c.draft){ const el = document.getElementById('msg-text'); if (el){ el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }
+  },
   bulk(scope){ const sel = {}; bulkPool(scope).filter(bulkDue('water')).forEach(p => sel[p.id] = true); openSheet('bulk', null, {scope, act:'water', sel, note:''}); },
   bulkDemo(){ S.tab = 'buddies'; S.nav.buddies = []; S.sheet = null; render(); A.bulk('mine'); },
   bulkAct(k){ S.sheet.act = k; renderSheet(); },
@@ -1814,6 +1965,7 @@ const A = {
   },
 };
 const F = {
+  msg(...args){ args.pop(); const c = chatById(args.join(':')), el = document.getElementById('msg-text'), text = (el?.value || '').trim(); if (!c || !text) return; chatSend(c, text); },
   give(id){
     const sh = S.sheet, i = S.inits.find(x => x.id === id), it = i.items[sh.item], qty = Math.min(sh.qty, it.need - it.got);
     if (qty <= 0) return toast('That one is already covered. Pick another crop.');
@@ -1891,6 +2043,7 @@ function bind(e){
     if (e.type === 'change' && t.files?.[0]){ S.cam.photo = URL.createObjectURL(t.files[0]); S.cam.src = 'photo'; S.cam.marks = []; S.cam.tried = true; S.scan.sel = null; S.sheet = null; camPref(false); render(); }
     return;
   }
+  if (t.dataset?.draft){ const c = chatById(t.dataset.draft); if (c) c.draft = t.value; return; }
   if (t.dataset?.rec !== undefined){ S.rec.map[S.rec.labels[+t.dataset.rec]] = t.value; recSave(); recReset(); return; }
   if (t.dataset?.bind){ const [o, k] = resolve(t.dataset.bind); o[k] = t.value;
     if (S.sheet?.type === 'newinit'){ const el = document.getElementById('ni-total'); if (el) el.textContent = niTotal() + ' ' + S.sheet.unit; } }
